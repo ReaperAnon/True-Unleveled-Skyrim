@@ -23,7 +23,7 @@ namespace TrueUnleveledSkyrim
 
     public class TUSConfig_ItemAdjustments
     {
-        [Tooltip("If enabled, changes item stats to match Morrowloot's vision. Orcish equipment becomes stronger than Dwarven, and Glass, Ebony, Stalhrim, Dragon, Daedric, and unique items are stronger.")]
+        [Tooltip("If enabled, changes item stats to match Morrowloot's vision. Glass, Ebony, Stalhrim, Dragon, Daedric, and unique items will be stronger.")]
         public bool MorrowlootifyItems { get; set; } = true;
         public TUSConfig_Morrowloot MorrowlootifyOptions { get; set; } = new TUSConfig_Morrowloot();
     }
@@ -40,9 +40,9 @@ namespace TrueUnleveledSkyrim
     public class TUSConfig_Morrowloot
     {
         [Tooltip("If enabled, skips stat adjusment on all items tagged as a \"Daedric Artifact\".")]
-        public bool SkipArtifacts { get; set; } = true;
+        public bool SkipArtifacts { get; set; } = false;
         [Tooltip("If enabled, skips stat adjustment on all unique items, namely the ones marked with the tag to \"Disallow Enchanting\".")]
-        public bool SkipUniques { get; set; } = true;
+        public bool SkipUniques { get; set; } = false;
         [Tooltip("NOT YET IMPLEMENTED - If enabled, tempering is made about 40% less effective across the board for balancing reasons, making way for the artifacts to shine without Smithing being mandatory.")]
         public bool TemperingDebuff { get; set; } = true;
     }
