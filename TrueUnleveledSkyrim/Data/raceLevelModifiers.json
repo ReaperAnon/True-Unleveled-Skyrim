@@ -1,0 +1,14 @@
+{
+  "Data": [
+    {
+      "Keys": [
+        "Draugr",
+        "Vampire",
+        "Dragon"
+      ],
+      "ForbiddenKeys": [],
+      "LevelModifierAdd": 0,
+      "LevelModifierMult": 2
+    }
+  ]
+}

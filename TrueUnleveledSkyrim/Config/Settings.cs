@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TrueUnleveledSkyrim
+namespace TrueUnleveledSkyrim.Config
 {
     public class TUSConfig
     {
@@ -36,6 +36,8 @@ namespace TrueUnleveledSkyrim
         public int MinItemLevel { get; set; } = 0;
         [Tooltip("If enabled, artifact items will always have the highest level variant in the leveled list.")]
         public bool UnlevelArtifacts { get; set; } = true;
+        [Tooltip("If enabled, artifact unleveling will search for artifact lists manually instead of using the predefined artifact keys. Takes much longer, but also works on leveled artifacts added by other mods.")]
+        public bool SlowArtifactUnleveling { get; set; } = false;
     }
     public class TUSConfig_Morrowloot
     {

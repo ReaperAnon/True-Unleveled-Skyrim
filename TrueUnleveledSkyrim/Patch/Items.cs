@@ -11,19 +11,20 @@ using Mutagen.Bethesda.FormKeys.SkyrimSE;
 using Mutagen.Bethesda.Synthesis;
 using Mutagen.Bethesda.Plugins.Cache;
 
-namespace TrueUnleveledSkyrim
+namespace TrueUnleveledSkyrim.Patch
 {
     class ItemsPatcher
     {
-        private class ArmorValues
+        // A struct to hold the original and morrowloot-inspired stats of an armor.
+        private readonly struct ArmorValues
         {
-            public float ArmorValue { get; set; } = 0;
-            public float ArmorWeight { get; set; } = 0;
-            public double ArmorPrice { get; set; } = 0;
+            public readonly float ArmorValue { get; }
+            public readonly float ArmorWeight { get; }
+            public readonly double ArmorPrice { get; }
 
-            public float ArmorValueMod { get; set; } = 0;
-            public float ArmorWeightMod { get; set; } = 0;
-            public double ArmorPriceMod { get; set; } = 0;
+            public readonly float ArmorValueMod { get; }
+            public readonly float ArmorWeightMod { get; }
+            public readonly double ArmorPriceMod { get; }
 
             public ArmorValues(float armorValue, float armorWeight, uint armorPrice, float armorValueMod, float armorWeightMod, uint armorPriceMod)
             {
@@ -32,21 +33,22 @@ namespace TrueUnleveledSkyrim
             }
         };
 
-        private class WeaponValues
+        // A struct to hold the original and morrowloot-inspired stats of a weapon.
+        private readonly struct WeaponValues
         {
-            public float WeaponDamage { get; set; } = 0;
-            public float WeaponWeight { get; set; } = 0;
-            public double WeaponPrice { get; set; } = 0;
-            public float WeaponSpeed { get; set; } = 0;
-            public float WeaponCritDamage { get; set; } = 0;
-            public float WeaponCritMult { get; set; } = 0;
+            public float WeaponDamage { get; }
+            public float WeaponWeight { get; }
+            public double WeaponPrice { get; }
+            public float WeaponSpeed { get; }
+            public float WeaponCritDamage { get; }
+            public float WeaponCritMult { get; }
 
-            public float WeaponDamageMod { get; set; } = 0;
-            public float WeaponWeightMod { get; set; } = 0;
-            public double WeaponPriceMod { get; set; } = 0;
-            public float WeaponSpeedMod { get; set; } = 0;
-            public float WeaponCritDamageMod { get; set; } = 0;
-            public float WeaponCritMultMod { get; set; } = 0;
+            public float WeaponDamageMod { get; }
+            public float WeaponWeightMod { get; }
+            public double WeaponPriceMod { get; }
+            public float WeaponSpeedMod { get; }
+            public float WeaponCritDamageMod { get; }
+            public float WeaponCritMultMod { get; }
 
             public WeaponValues(float weaponDamage, float weaponWeight, float weaponPrice, float weaponSpeed, float weaponCritDamage, float weaponCritMult, float weaponDamageMod, float weaponWeightMod, float weaponPriceMod, float weaponSpeedMod, float weaponCritDamageMod, float weaponCritMultMod)
             {
@@ -55,7 +57,8 @@ namespace TrueUnleveledSkyrim
             }
         };
 
-        private static readonly Dictionary<IFormLinkGetter<IKeywordGetter>, Dictionary<IFormLinkGetter<IKeywordGetter>, WeaponValues>> weaponKeys = new Dictionary<IFormLinkGetter<IKeywordGetter>, Dictionary<IFormLinkGetter<IKeywordGetter>, WeaponValues>>()
+        // Read-only dictionary to match weapon materials and types to their corresponding stats.
+        private static readonly IReadOnlyDictionary<IFormLinkGetter<IKeywordGetter>, Dictionary<IFormLinkGetter<IKeywordGetter>, WeaponValues>> weaponKeys = new Dictionary<IFormLinkGetter<IKeywordGetter>, Dictionary<IFormLinkGetter<IKeywordGetter>, WeaponValues>>()
         {
             {
                 Skyrim.Keyword.WeapMaterialDaedric, new Dictionary<IFormLinkGetter<IKeywordGetter>, WeaponValues>()
@@ -164,7 +167,8 @@ namespace TrueUnleveledSkyrim
             }
         };
 
-        private static readonly Dictionary<IFormLinkGetter<IKeywordGetter>, Dictionary<IFormLinkGetter<IKeywordGetter>, Dictionary<IFormLinkGetter<IKeywordGetter>, ArmorValues>>> armorKeys = new Dictionary<IFormLinkGetter<IKeywordGetter>, Dictionary<IFormLinkGetter<IKeywordGetter>, Dictionary<IFormLinkGetter<IKeywordGetter>, ArmorValues>>>()
+        // Read-only dictionary to match armor materials, types and pieces to thheir corresponding stats.
+        private static readonly IReadOnlyDictionary<IFormLinkGetter<IKeywordGetter>, Dictionary<IFormLinkGetter<IKeywordGetter>, Dictionary<IFormLinkGetter<IKeywordGetter>, ArmorValues>>> armorKeys = new Dictionary<IFormLinkGetter<IKeywordGetter>, Dictionary<IFormLinkGetter<IKeywordGetter>, Dictionary<IFormLinkGetter<IKeywordGetter>, ArmorValues>>>()
         {
             {
                 Skyrim.Keyword.ArmorMaterialDaedric, new Dictionary<IFormLinkGetter<IKeywordGetter>, Dictionary<IFormLinkGetter<IKeywordGetter>, ArmorValues>>()
@@ -368,11 +372,13 @@ namespace TrueUnleveledSkyrim
             }
         };
 
+        // Rounds to .5 and then to the next whole number.
         private static double RoundWithHalf(double value)
         {
             return Math.Ceiling(2 * value) / 2d;
         }
 
+        // Patches weapon stats to have a morrowloot-inspired balance while keeping their relative balance intended by the mod authors.
         private static bool PatchWeaponValues(Weapon weaponEntry, ILinkCache linkCache)
         {
             if (weaponEntry.Keywords is null || weaponEntry.BasicStats is null || weaponEntry.Data is null || weaponEntry.Critical is null) return false;
@@ -405,6 +411,7 @@ namespace TrueUnleveledSkyrim
             return wasChanged;
         }
 
+        // Patches armor stats to have a morrowloot-inspired balance while keeping their relative balance intended by the mod authors.
         private static bool PatchArmorValues(Armor armorEntry, ILinkCache linkCache)
         {
             if (armorEntry.Keywords is null) return false;
@@ -442,8 +449,10 @@ namespace TrueUnleveledSkyrim
             return wasChanged;
         }
 
+        // Main function to change all item stats to new morrowloot-inspired values.
         public static void MorrowlootifyItems(IPatcherState<ISkyrimMod, ISkyrimModGetter> state)
         {
+            uint processedRecords = 0;
             foreach(IArmorGetter? armorGetter in state.LoadOrder.PriorityOrder.Armor().WinningOverrides())
             {
                 bool wasChanged = false;
@@ -451,26 +460,39 @@ namespace TrueUnleveledSkyrim
 
                 wasChanged |= PatchArmorValues(armorCopy, state.LinkCache);
 
+                ++processedRecords;
+                if (processedRecords % 100 == 0)
+                    Console.WriteLine("Processed " + processedRecords + " armors.");
+
                 if(wasChanged)
                 {
                     state.PatchMod.Armors.Set(armorCopy);
-                    Console.WriteLine("Patched armor: " + armorCopy.EditorID);
+                    // Console.WriteLine("Patched armor: " + armorCopy.EditorID);
                 }
             }
 
-            foreach(IWeaponGetter? weaponGetter in state.LoadOrder.PriorityOrder.Weapon().WinningOverrides())
+            Console.WriteLine("Processed " + processedRecords + " armors in total.");
+            processedRecords = 0;
+
+            foreach (IWeaponGetter? weaponGetter in state.LoadOrder.PriorityOrder.Weapon().WinningOverrides())
             {
                 bool wasChanged = false;
                 Weapon weaponCopy = weaponGetter.DeepCopy();
 
                 wasChanged |= PatchWeaponValues(weaponCopy, state.LinkCache);
 
-                if(wasChanged)
+                ++processedRecords;
+                if (processedRecords % 100 == 0)
+                    Console.WriteLine("Processed " + processedRecords + " weapons.");
+
+                if (wasChanged)
                 {
                     state.PatchMod.Weapons.Set(weaponCopy);
-                    Console.WriteLine("Patched weapon: " + weaponCopy.EditorID);
+                    // Console.WriteLine("Patched weapon: " + weaponCopy.EditorID);
                 }
             }
+
+            Console.WriteLine("Processed " + processedRecords + " weapons in total.");
         }
     }
 }

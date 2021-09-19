@@ -1,0 +1,21 @@
+{
+    "NPCs": [
+        {
+            "Keys": [
+                "CWFieldCO"
+            ],
+            "ForbiddenKeys": [],
+            "Level": 40
+        },
+        {
+            "Keys": [
+                "Rikke",
+                "Galmar",
+                "Ulfric",
+                "Tullius"
+            ],
+            "ForbiddenKeys": [],
+            "Level": 50
+        }
+    ]
+}

@@ -1,10 +1,12 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Threading.Tasks;
+
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Synthesis;
 using Mutagen.Bethesda.Skyrim;
-using System.Threading.Tasks;
+
+using TrueUnleveledSkyrim.Config;
+using TrueUnleveledSkyrim.Patch;
 
 namespace TrueUnleveledSkyrim
 {
@@ -24,7 +26,10 @@ namespace TrueUnleveledSkyrim
         public static void RunPatch(IPatcherState<ISkyrimMod, ISkyrimModGetter> state)
         {
             if (ModSettings.Value.LeveledLists.UnlevelItemLists)
+            {
                 LeveledItemsPatcher.UnlevelItems(state);
+                NPCsPatcher.UnlevelNPCs(state);
+            }
 
             if (ModSettings.Value.ItemAdjustments.MorrowlootifyItems)
                 ItemsPatcher.MorrowlootifyItems(state);

@@ -1,0 +1,19 @@
+{
+  "LeveledLists": {
+    "UnlevelItemLists": true,
+    "ItemListOptions": {
+      "MaxItemLevel": 27,
+      "MinItemLevel": 0,
+      "UnlevelArtifacts": true,
+      "SlowArtifactUnleveling": false
+    }
+  },
+  "ItemAdjustments": {
+    "MorrowlootifyItems": true,
+    "MorrowlootifyOptions": {
+      "SkipArtifacts": false,
+      "SkipUniques": false,
+      "TemperingDebuff": true
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+    "NPCs": [
+        {
+            "Keys": [
+                "CWImperialFaction",
+                "CWSonsFaction",
+                "GuardDialogueFaction",
+                "CWSonsFactionNPC"
+            ],
+            "MinLevel": 15,
+            "MaxLevel": 35
+        },
+        {
+            "Keys": [
+                "JobHousecarlFaction"
+            ],
+            "Level": 40
+        }
+    ]
+}

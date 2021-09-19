@@ -1,0 +1,60 @@
+{
+    "Zones": [
+        {
+            "Keys": [
+                "ThalmorEmbassy",
+                "StendarrsBeacon",
+                "HalloftheVigilant"
+            ],
+            "ForbiddenKeys": [],
+            "MinLevel": 15,
+            "MaxLevel": 30,
+            "Range": 15
+        },
+        {
+            "Keys": [
+                "DLC1Falmer",
+                "DLC1zFalmer",
+                "DLC1ForebearsHoldout"
+            ],
+            "ForbiddenKeys": [],
+            "MinLevel": 15,
+            "MaxLevel": 45,
+            "Range": 15
+        },
+        {
+            "Keys": [
+                "DLC1VampireCastle"
+            ],
+            "ForbiddenKeys": [],
+            "MinLevel": 25,
+            "MaxLevel": 50,
+            "Range": 25
+        },
+        {
+            "Keys": [
+                "DLC2Book"
+            ],
+            "ForbiddenKeys": [],
+            "MinLevel": 25,
+            "MaxLevel": 50,
+            "Range": 25,
+            "EnableCombatBoundary": true
+        },
+        {
+            "Keys": [
+                "DLC2AbandonedLodge",
+                "DLC2BujoldsRetreat",
+                "DLC2POI13",
+                "DLC2DremoraShop",
+                "DLC2RamshackleTradingPost",
+                "DLC2HoldingCellBard",
+                "Doomstone"
+            ],
+            "ForbiddenKeys": [],
+            "MinLevel": 1,
+            "MaxLevel": 30,
+            "Range": 30
+        }
+    ]
+}

@@ -1,0 +1,41 @@
+{
+  "Followers": 
+  [
+    {
+      "Key": "Inigo",
+      "ForbiddenKeys": []
+    },
+    {
+      "Key": "Sofia",
+      "ForbiddenKeys": []
+    },
+    {
+      "Key": "Vilja",
+      "ForbiddenKeys": []
+    },
+    {
+      "Key": "Hoth",
+      "ForbiddenKeys": []
+    },
+    {
+      "Key": "Cerwiden",
+      "ForbiddenKeys": []
+    },
+    {
+      "Key": "Serana",
+      "ForbiddenKeys": []
+    },
+    {
+      "Key": "Caesia",
+      "ForbiddenKeys": []
+    },
+    {
+      "Key": "Kate_Selene",
+      "ForbiddenKeys": []
+    },
+    {
+      "Key": "TaniaTheHermit",
+      "ForbiddenKeys": []
+    }
+  ]
+}
