@@ -155,7 +155,7 @@ namespace TrueUnleveledSkyrim.Patch
             {
                 if (itemList.Entries![i].Data is null) continue;
 
-                if (itemList.Entries![i].Data!.Level >= rangeLow && itemList.Entries![i].Data!.Level < rangeHigh)
+                if (itemList.Entries![i].Data!.Level >= rangeLow && itemList.Entries![i].Data!.Level <= rangeHigh)
                 {
                     itemList.Entries!.RemoveAt(i);
                     wasChanged = true;
@@ -195,7 +195,7 @@ namespace TrueUnleveledSkyrim.Patch
                         {
                             int lvlMed = (int)Math.Round((lvlMin + lvlMax) * 0.4);
                             RemoveItemsWithRange(weakCopy, lvlMed + 1, lvlMax);
-                            RemoveItemsWithRange(strongCopy, lvlMin, lvlMed);
+                            RemoveItemsWithRange(strongCopy, lvlMin, lvlMed - 1);
                         }
                         UnlevelList(weakCopy);
                         UnlevelList(strongCopy);
