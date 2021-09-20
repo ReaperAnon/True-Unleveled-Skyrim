@@ -7,12 +7,15 @@ using Mutagen.Bethesda.Skyrim;
 
 using TrueUnleveledSkyrim.Config;
 using TrueUnleveledSkyrim.Patch;
+using Mutagen.Bethesda.Plugins.Cache;
 
 namespace TrueUnleveledSkyrim
 {
     public class Patcher
     {
         public static Lazy<TUSConfig> ModSettings = null!;
+
+        public static ILinkCache LinkCache { get; set; } = null!;
 
         public static async Task<int> Main(string[] args)
         {
@@ -25,6 +28,8 @@ namespace TrueUnleveledSkyrim
 
         public static void RunPatch(IPatcherState<ISkyrimMod, ISkyrimModGetter> state)
         {
+            LinkCache = state.LoadOrder.PriorityOrder.ToImmutableLinkCache();
+
             if (ModSettings.Value.LeveledLists.UnlevelItemLists)
             {
                 LeveledItemsPatcher.UnlevelItems(state);

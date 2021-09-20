@@ -379,7 +379,7 @@ namespace TrueUnleveledSkyrim.Patch
         }
 
         // Patches weapon stats to have a morrowloot-inspired balance while keeping their relative balance intended by the mod authors.
-        private static bool PatchWeaponValues(Weapon weaponEntry, ILinkCache linkCache)
+        private static bool PatchWeaponValues(Weapon weaponEntry)
         {
             if (weaponEntry.Keywords is null || weaponEntry.BasicStats is null || weaponEntry.Data is null || weaponEntry.Critical is null) return false;
             if (Patcher.ModSettings.Value.ItemAdjustments.MorrowlootifyOptions.SkipArtifacts && weaponEntry.Keywords.Contains(Skyrim.Keyword.DaedricArtifact)) return false;
@@ -412,7 +412,7 @@ namespace TrueUnleveledSkyrim.Patch
         }
 
         // Patches armor stats to have a morrowloot-inspired balance while keeping their relative balance intended by the mod authors.
-        private static bool PatchArmorValues(Armor armorEntry, ILinkCache linkCache)
+        private static bool PatchArmorValues(Armor armorEntry)
         {
             if (armorEntry.Keywords is null) return false;
             if (Patcher.ModSettings.Value.ItemAdjustments.MorrowlootifyOptions.SkipArtifacts && armorEntry.Keywords.Contains(Skyrim.Keyword.DaedricArtifact)) return false;
@@ -458,7 +458,7 @@ namespace TrueUnleveledSkyrim.Patch
                 bool wasChanged = false;
                 Armor armorCopy = armorGetter.DeepCopy();
 
-                wasChanged |= PatchArmorValues(armorCopy, state.LinkCache);
+                wasChanged |= PatchArmorValues(armorCopy);
 
                 ++processedRecords;
                 if (processedRecords % 100 == 0)
@@ -479,7 +479,7 @@ namespace TrueUnleveledSkyrim.Patch
                 bool wasChanged = false;
                 Weapon weaponCopy = weaponGetter.DeepCopy();
 
-                wasChanged |= PatchWeaponValues(weaponCopy, state.LinkCache);
+                wasChanged |= PatchWeaponValues(weaponCopy);
 
                 ++processedRecords;
                 if (processedRecords % 100 == 0)

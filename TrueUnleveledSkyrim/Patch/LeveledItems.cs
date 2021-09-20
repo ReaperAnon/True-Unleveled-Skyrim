@@ -10,7 +10,7 @@ using Mutagen.Bethesda.Plugins.Aspects;
 using Mutagen.Bethesda.Plugins.Records;
 
 using TrueUnleveledSkyrim.Config;
-
+using Mutagen.Bethesda.Plugins;
 
 namespace TrueUnleveledSkyrim.Patch
 {
@@ -34,9 +34,6 @@ namespace TrueUnleveledSkyrim.Patch
         // Checks if the given leveled list is an artifact list by checking if all the item names in the list are the same.
         private static bool IsArtifactList(LeveledItem itemList, ILinkCache linkCache)
         {
-            if (!Patcher.ModSettings.Value.LeveledLists.ItemListOptions.SlowArtifactUnleveling)
-                return IsArtifactList(itemList);
-
             int entryCount = 0;
             string? itemName = null;
 
@@ -59,7 +56,11 @@ namespace TrueUnleveledSkyrim.Patch
                 }
             }
 
-            return entryCount == (itemList.Entries?.Count ?? 0);
+            // If it's not an artifact, consult the artifactKeys.json list to double check.
+            bool isArtifact = entryCount == (itemList.Entries?.Count ?? 0);
+            if (!isArtifact) isArtifact |= IsArtifactList(itemList);
+
+            return isArtifact;
         }
 
         // Removes every item from a list other than the highest level one.
@@ -165,6 +166,17 @@ namespace TrueUnleveledSkyrim.Patch
             return wasChanged;
         }
 
+        private static void ChangeNewLVLIEntries(LeveledItem itemList)
+        {
+            if (!itemList.EditorID!.Contains(TUSConstants.PostfixPart, StringComparison.OrdinalIgnoreCase)) return;
+            foreach(LeveledItemEntry entry in itemList.Entries.EmptyIfNull())
+            {
+                if (entry.Data is null) continue;
+                foreach (var thing in entry.Data.ContainedFormLinks)
+                    Console.WriteLine(" -" + thing.ToString());
+            }
+        }
+
         // Main function to unlevel all leveled item lists.
         public static void UnlevelItems(IPatcherState<ISkyrimMod, ISkyrimModGetter> state)
         {
@@ -176,11 +188,11 @@ namespace TrueUnleveledSkyrim.Patch
                 bool wasChanged = false;
                 LeveledItem listCopy = lvlItemGetter.DeepCopy();
 
-                if (!IsArtifactList(listCopy, state.LinkCache))
+                if (!IsArtifactList(listCopy, Patcher.LinkCache))
                 {
                     int lvlMin, lvlMax;
 
-                    wasChanged |= RemoveRareItems(listCopy, state.LinkCache);
+                    wasChanged |= RemoveRareItems(listCopy, Patcher.LinkCache);
                     GetLevelBoundaries(listCopy, out lvlMin, out lvlMax);
                     if (lvlMin != Int16.MaxValue && lvlMax != -1)
                     {
@@ -197,6 +209,7 @@ namespace TrueUnleveledSkyrim.Patch
                             RemoveItemsWithRange(weakCopy, lvlMed + 1, lvlMax);
                             RemoveItemsWithRange(strongCopy, lvlMin, lvlMed - 1);
                         }
+
                         UnlevelList(weakCopy);
                         UnlevelList(strongCopy);
                         
@@ -218,6 +231,12 @@ namespace TrueUnleveledSkyrim.Patch
                     // Console.WriteLine("Modifed leveled item list: " + listCopy.EditorID);
                 }
             }
+
+            /*foreach(var entry in state.PatchMod.LeveledItems)
+            {
+                Console.WriteLine("Checking entry " + entry.EditorID);
+                ChangeNewLVLIEntries(entry);
+            }*/
 
             Console.WriteLine("Processed " + processedRecords + " leveled item lists in total.");
         }

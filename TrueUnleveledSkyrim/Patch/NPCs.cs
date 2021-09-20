@@ -21,7 +21,7 @@ namespace TrueUnleveledSkyrim.Patch
         private static NPCFactions? customNPCsByFaction;
         private static RaceModifiers? raceModifiers;
 
-        // Returns the level multiplier for the desired NPC based on their race.
+        // Returns the level modifiers for the desired NPC based on their race.
         private static void GetLevelMultiplier(Npc npc, ILinkCache linkCache, out short levelModAdd, out float levelModMult)
         {
             levelModAdd = 0; levelModMult = 1;
@@ -75,7 +75,7 @@ namespace TrueUnleveledSkyrim.Patch
 
                         if (willChange)
                         {
-                            npc.Configuration.Level = new NpcLevel() { Level = (short)(dataSet.Level * levelModMult + levelModAdd) };
+                            npc.Configuration.Level = new NpcLevel() { Level = (short)Math.Max(dataSet.Level * levelModMult + levelModAdd, 1) };
                             return true;
                         }
 
@@ -115,7 +115,7 @@ namespace TrueUnleveledSkyrim.Patch
                             if (willChange)
                             {
                                 short newLevel = (short)(dataSet.Level ?? randomizer.Next((int)dataSet.MinLevel!, (int)dataSet.MaxLevel!));
-                                npc.Configuration.Level = new NpcLevel() { Level = (short)(newLevel * levelModMult + levelModAdd) };
+                                npc.Configuration.Level = new NpcLevel() { Level = (short)Math.Max(newLevel * levelModMult + levelModAdd, 1) };
                                 return true;
                             }
 
@@ -128,7 +128,7 @@ namespace TrueUnleveledSkyrim.Patch
             return false;
         }
 
-        // Gives all NPCs that revolve around the player a static level.
+        // Gives all NPCs that revolve around the player a static level and applies level modifiers.
         private static bool SetStaticLevel(Npc npc, ILinkCache linkCache)
         {
             short levelModAdd; float levelModMult;
@@ -154,7 +154,7 @@ namespace TrueUnleveledSkyrim.Patch
             else if(npc.Configuration.Level is NpcLevel npcLevel)
             {
                 short prevLevel = npcLevel.Level;
-                npcLevel.Level = (short)(npcLevel.Level * levelModMult + levelModAdd); 
+                npcLevel.Level = (short)Math.Max(npcLevel.Level * levelModMult + levelModAdd, 1); 
                 wasChanged = npcLevel.Level != prevLevel;
             }
 
@@ -162,7 +162,7 @@ namespace TrueUnleveledSkyrim.Patch
         }
 
         // Changes the inventory of NPCs to have weaker or stronger versions of their equipment lists based on their level.
-        private static bool ChangeInventory(Npc npc, IPatcherState<ISkyrimMod, ISkyrimModGetter> state)
+        private static bool ChangeInventory(Npc npc, IPatcherState<ISkyrimMod, ISkyrimModGetter> state, ILinkCache linkCache)
         {
             bool wasChanged = false;
 
@@ -171,12 +171,12 @@ namespace TrueUnleveledSkyrim.Patch
                 string usedPostfix = npcLevel.Level < 10 ? TUSConstants.WeakPostfix : npcLevel.Level > 25 ? TUSConstants.StrongPostfix : "";
                 foreach (var entry in npc.Items.EmptyIfNull())
                 {
-                    var resolvedItem = entry.Item.Item.TryResolve(state.LinkCache);
-                    if (resolvedItem is ILeveledItemGetter)
+                    ILeveledItemGetter? resolvedItem = entry.Item.Item.TryResolve<ILeveledItemGetter>(linkCache);
+                    if (resolvedItem is not null)
                     {
                         LeveledItem? newItem = state.PatchMod.LeveledItems.Where(x => x.EditorID == resolvedItem.EditorID + usedPostfix).FirstOrDefault();
                         if (newItem is not null)
-                            entry.Item.Item = (IFormLink<IItemGetter>)newItem.AsLinkGetter();
+                            entry.Item.Item = newItem.AsLink();
                     }
                 }
             }
@@ -220,8 +220,8 @@ namespace TrueUnleveledSkyrim.Patch
                 bool wasChanged = false;
                 Npc npcCopy = npcGetter.DeepCopy();
 
-                wasChanged |= SetStaticLevel(npcCopy, state.LinkCache);
-                wasChanged |= ChangeInventory(npcCopy, state);
+                wasChanged |= SetStaticLevel(npcCopy, Patcher.LinkCache);
+                wasChanged |= ChangeInventory(npcCopy, state, Patcher.LinkCache);
 
                 ++processedRecords;
                 if (processedRecords % 100 == 0)
