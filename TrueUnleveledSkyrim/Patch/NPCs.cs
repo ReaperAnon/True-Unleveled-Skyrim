@@ -162,21 +162,32 @@ namespace TrueUnleveledSkyrim.Patch
         }
 
         // Changes the inventory of NPCs to have weaker or stronger versions of their equipment lists based on their level.
-        private static bool ChangeInventory(Npc npc, IPatcherState<ISkyrimMod, ISkyrimModGetter> state, ILinkCache linkCache)
+        private static bool ChangeEquipment(Npc npc, IPatcherState<ISkyrimMod, ISkyrimModGetter> state, ILinkCache linkCache)
         {
             bool wasChanged = false;
 
             if(npc.Configuration.Level is NpcLevel npcLevel)
             {
                 string usedPostfix = npcLevel.Level < 10 ? TUSConstants.WeakPostfix : npcLevel.Level > 25 ? TUSConstants.StrongPostfix : "";
-                foreach (var entry in npc.Items.EmptyIfNull())
+                if (!usedPostfix.IsNullOrEmpty())
                 {
-                    ILeveledItemGetter? resolvedItem = entry.Item.Item.TryResolve<ILeveledItemGetter>(linkCache);
-                    if (resolvedItem is not null)
+                    foreach (ContainerEntry? entry in npc.Items.EmptyIfNull())
                     {
-                        LeveledItem? newItem = state.PatchMod.LeveledItems.Where(x => x.EditorID == resolvedItem.EditorID + usedPostfix).FirstOrDefault();
-                        if (newItem is not null)
-                            entry.Item.Item = newItem.AsLink();
+                        ILeveledItemGetter? resolvedItem = entry.Item.Item.TryResolve<ILeveledItemGetter>(linkCache);
+                        if (resolvedItem is not null)
+                        {
+                            LeveledItem? newItem = state.PatchMod.LeveledItems.Where(x => x.EditorID == resolvedItem.EditorID + usedPostfix).FirstOrDefault();
+                            if (newItem is not null)
+                                entry.Item.Item = newItem.AsLink();
+                        }
+                    }
+
+                    IOutfitGetter? npcOutfit = npc.DefaultOutfit.TryResolve(linkCache);
+                    if(npcOutfit is not null)
+                    {
+                        Outfit? newOutfit = state.PatchMod.Outfits.Where(x => x.EditorID == npcOutfit.EditorID + usedPostfix).FirstOrDefault();
+                        if (newOutfit is not null)
+                            npc.DefaultOutfit = newOutfit.AsNullableLink();
                     }
                 }
             }
@@ -184,8 +195,37 @@ namespace TrueUnleveledSkyrim.Patch
             return wasChanged;
         }
 
+        private static bool RelevelNPCSkills(Npc npc, ILinkCache linkCache)
+        {
+            float skillsPerLevel = Patcher.ModSettings.Value.Unleveling.UnlevelingOptions.NPCSkillpointsPerLevel;
+            int availablePoints = 0;
+
+            if (npc.PlayerSkills is not null && npc.Configuration.Level is NpcLevel npcLevel)
+            {
+                availablePoints = (int)Math.Round(skillsPerLevel * npcLevel.Level);
+                IClassGetter? npcClass = npc.Class.TryResolve(linkCache);
+                if (npcClass is not null)
+                {
+                    float weightSum = 0;
+                    foreach (var skillWeight in npcClass.SkillWeights)
+                        weightSum += skillWeight.Value;
+
+                    foreach(var skillWeight in npcClass.SkillWeights)
+                    {
+                        float skillLevel = 15 + availablePoints * (skillWeight.Value / weightSum);
+                        npc.PlayerSkills.SkillValues[skillWeight.Key] = (byte)skillLevel;
+                    }
+
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+
         // Main function to unlevel all NPCs.
-        public static void UnlevelNPCs(IPatcherState<ISkyrimMod, ISkyrimModGetter> state)
+        public static void PatchNPCs(IPatcherState<ISkyrimMod, ISkyrimModGetter> state)
         {
             excludedNPCs = JsonHelper.LoadConfig<ExcludedNPCs>(TUSConstants.ExcludedNPCsPath);
             customNPCsByID = JsonHelper.LoadConfig<NPCEDIDs>(TUSConstants.NPCEDIDPath);
@@ -221,7 +261,8 @@ namespace TrueUnleveledSkyrim.Patch
                 Npc npcCopy = npcGetter.DeepCopy();
 
                 wasChanged |= SetStaticLevel(npcCopy, Patcher.LinkCache);
-                wasChanged |= ChangeInventory(npcCopy, state, Patcher.LinkCache);
+                wasChanged |= ChangeEquipment(npcCopy, state, Patcher.LinkCache);
+                wasChanged |= RelevelNPCSkills(npcCopy, Patcher.LinkCache);
 
                 ++processedRecords;
                 if (processedRecords % 100 == 0)

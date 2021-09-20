@@ -450,7 +450,7 @@ namespace TrueUnleveledSkyrim.Patch
         }
 
         // Main function to change all item stats to new morrowloot-inspired values.
-        public static void MorrowlootifyItems(IPatcherState<ISkyrimMod, ISkyrimModGetter> state)
+        public static void PatchItems(IPatcherState<ISkyrimMod, ISkyrimModGetter> state)
         {
             uint processedRecords = 0;
             foreach(IArmorGetter? armorGetter in state.LoadOrder.PriorityOrder.Armor().WinningOverrides())

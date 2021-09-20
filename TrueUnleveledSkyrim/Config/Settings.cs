@@ -9,7 +9,7 @@ namespace TrueUnleveledSkyrim.Config
 {
     public class TUSConfig
     {
-        public TUSConfig_LeveledLists LeveledLists { get; set; } = new TUSConfig_LeveledLists();
+        public TUSConfig_LeveledLists Unleveling { get; set; } = new TUSConfig_LeveledLists();
 
         public TUSConfig_ItemAdjustments ItemAdjustments { get; set; } = new TUSConfig_ItemAdjustments();
     }
@@ -17,8 +17,8 @@ namespace TrueUnleveledSkyrim.Config
     public class TUSConfig_LeveledLists
     {
         [Tooltip("If enabled, leveled item lists will be unleveled and purged of items higher or lower than the specified levels.")]
-        public bool UnlevelItemLists { get; set; } = true;
-        public TUSConfig_Items ItemListOptions { get; set; } = new TUSConfig_Items();
+        public bool UnlevelGame { get; set; } = true;
+        public TUSConfig_Items UnlevelingOptions { get; set; } = new TUSConfig_Items();
     }
 
     public class TUSConfig_ItemAdjustments
@@ -30,6 +30,8 @@ namespace TrueUnleveledSkyrim.Config
 
     public class TUSConfig_Items
     {
+        [Tooltip("The amount of skillpoints enemies get per every level they have. The points are distributed among their skills based on their class and their major and minor skills. All of their skills start at 15, these are applied on top of that.")]
+        public float NPCSkillpointsPerLevel { get; set; } = 9.5f;
         [Tooltip("The level from which items are purged from leveled lists. Setting it to 0 means there is no upper level limit.\nTiers (based on vanilla leveled lists):\n1 - Iron\n2 - Steel\n6 - Orcish\n12 - Dwarven\n19 - Elven\n27 - Glass\n36 - Ebony\n46 - Daedric")]
         public int MaxItemLevel { get; set; } = 27;
         [Tooltip("The level below which items are purged from leveled lists. Setting it to 0 means there is no lower level limit.\nTiers (based on vanilla leveled lists):\n1 - Iron\n2 - Steel\n6 - Orcish\n12 - Dwarven\n19 - Elven\n27 - Glass\n36 - Ebony\n46 - Daedric")]
