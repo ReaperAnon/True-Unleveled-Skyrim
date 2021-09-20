@@ -1,11 +1,11 @@
 {
-  "LeveledLists": {
-    "UnlevelItemLists": true,
-    "ItemListOptions": {
+  "Unleveling": {
+    "UnlevelGame": true,
+    "UnlevelingOptions": {
+      "NPCSkillpointsPerLevel": 9.5,
       "MaxItemLevel": 27,
       "MinItemLevel": 0,
-      "UnlevelArtifacts": true,
-      "SlowArtifactUnleveling": false
+      "UnlevelArtifacts": true
     }
   },
   "ItemAdjustments": {
