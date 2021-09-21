@@ -166,14 +166,27 @@ namespace TrueUnleveledSkyrim.Patch
             return wasChanged;
         }
 
-        private static void ChangeNewLVLIEntries(LeveledItem itemList)
+        private static void ChangeNewLVLIEntries(LeveledItem itemList, IPatcherState<ISkyrimMod, ISkyrimModGetter> state, ILinkCache linkCache)
         {
-            if (!itemList.EditorID!.Contains(TUSConstants.PostfixPart, StringComparison.OrdinalIgnoreCase)) return;
+            bool isStrongEntry = false;
+            bool isWeakEntry = itemList.EditorID!.Contains(TUSConstants.WeakPostfix, StringComparison.OrdinalIgnoreCase);
+            if (!isWeakEntry)
+                isStrongEntry = itemList.EditorID!.Contains(TUSConstants.StrongPostfix, StringComparison.OrdinalIgnoreCase);
+            if (!isWeakEntry && !isStrongEntry) return;
+
+            ILinkCache newCache = state.PatchMod.ToImmutableLinkCache();
+
+            string usedPostfix = isWeakEntry ? TUSConstants.WeakPostfix : TUSConstants.StrongPostfix;
             foreach(LeveledItemEntry entry in itemList.Entries.EmptyIfNull())
             {
                 if (entry.Data is null) continue;
-                foreach (var thing in entry.Data.ContainedFormLinks)
-                    Console.WriteLine(" -" + thing.ToString());
+                IItemGetter? resolvedEntry = entry.Data.Reference.TryResolve(linkCache);
+                if(resolvedEntry is ILeveledItemGetter lvliGetter)
+                {
+                    LeveledItem? newEntry = state.PatchMod.LeveledItems.Where(x => x.EditorID == lvliGetter.EditorID + usedPostfix).FirstOrDefault();
+                    if(newEntry is not null)
+                        entry.Data.Reference = newEntry.AsLink();
+                }
             }
         }
 
@@ -232,11 +245,9 @@ namespace TrueUnleveledSkyrim.Patch
                 }
             }
 
-            /*foreach(var entry in state.PatchMod.LeveledItems)
-            {
-                Console.WriteLine("Checking entry " + entry.EditorID);
-                ChangeNewLVLIEntries(entry);
-            }*/
+            Console.WriteLine("Updating newly generated leveled list references.");
+            foreach(var entry in state.PatchMod.LeveledItems)
+                ChangeNewLVLIEntries(entry, state, Patcher.LinkCache);
 
             Console.WriteLine("Processed " + processedRecords + " leveled item lists in total.");
         }
