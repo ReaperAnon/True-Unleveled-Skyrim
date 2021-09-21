@@ -1,8 +1,10 @@
 {
   "Unleveling": {
     "UnlevelGame": true,
-    "UnlevelingOptions": {
-      "NPCSkillpointsPerLevel": 9.5,
+    "Options": {
+      "RelevelNPCSkills": true,
+      "NPCPointsPerLevel": 9.5,
+      "NPCMaxSkillLevel": 100,
       "MaxItemLevel": 27,
       "MinItemLevel": 0,
       "UnlevelArtifacts": true
@@ -10,7 +12,7 @@
   },
   "ItemAdjustments": {
     "MorrowlootifyItems": true,
-    "MorrowlootifyOptions": {
+    "Options": {
       "SkipArtifacts": false,
       "SkipUniques": false,
       "TemperingDebuff": true

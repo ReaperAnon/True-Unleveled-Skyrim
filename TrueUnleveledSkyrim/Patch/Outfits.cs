@@ -18,6 +18,7 @@ namespace TrueUnleveledSkyrim.Patch
 {
     class OutfitsPatcher
     {
+        // Replaces leveled item list entries in weak and strong outfit variants with the respective weak and strong variants of the list.
         private static void ReplaceLVLIEntries(Outfit outfit, IPatcherState<ISkyrimMod, ISkyrimModGetter> state, ILinkCache linkCache, bool isWeak)
         {
             for(int i = 0; i<outfit.Items!.Count; ++i)
@@ -33,7 +34,7 @@ namespace TrueUnleveledSkyrim.Patch
             }
         }
 
-        // just go through outfits, make a weak and strong copy, change the LVLI entries inside of them to their weak or strong postfix versions if they exist
+        // Main function to unlevel outfits.
         public static void PatchOutfits(IPatcherState<ISkyrimMod, ISkyrimModGetter> state)
         {
             uint processedRecords = 0;

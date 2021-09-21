@@ -10,7 +10,7 @@ using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
 
 using TrueUnleveledSkyrim.Config;
-
+using System.Collections.Generic;
 
 namespace TrueUnleveledSkyrim.Patch
 {
@@ -195,28 +195,53 @@ namespace TrueUnleveledSkyrim.Patch
             return wasChanged;
         }
 
+        class WeightPair
+        {
+            public Skill Skill { get; set; }
+            public float Weight { get; set; }
+        }
+
+        private static void DistributeSkills(IReadOnlyDictionary<Skill, byte> skillWeights, IDictionary<Skill, byte> skillValues, int skillPoints)
+        {
+            float weightSum = 0;
+            bool firstPass = true;
+            byte maxSkill = Patcher.ModSettings.Value.Unleveling.Options.NPCMaxSkillLevel;
+            List<KeyValuePair<Skill, byte>> tempWeights = skillWeights.ToList();
+            
+            do
+            {
+                int pointOverflow = 0;
+                weightSum = tempWeights.Sum(x => x.Value);
+                for (int i=tempWeights.Count - 1; i>=0; --i)
+                {
+                    if (firstPass)
+                        skillValues[tempWeights[i].Key] = 15;
+
+                    skillValues[tempWeights[i].Key] += (byte)(skillPoints * (tempWeights[i].Value / weightSum));
+                    if (skillValues[tempWeights[i].Key] > maxSkill)
+                    {
+                        pointOverflow += skillValues[tempWeights[i].Key] - maxSkill;
+                        skillValues[tempWeights[i].Key] = maxSkill;
+                        tempWeights.RemoveAt(i);
+                    }
+                }
+
+                firstPass = false;
+                skillPoints = pointOverflow;
+            } while (skillPoints > 0 && weightSum > 0);
+        }
+
         private static bool RelevelNPCSkills(Npc npc, ILinkCache linkCache)
         {
-            float skillsPerLevel = Patcher.ModSettings.Value.Unleveling.UnlevelingOptions.NPCSkillpointsPerLevel;
-            int availablePoints = 0;
+            if (!Patcher.ModSettings.Value.Unleveling.Options.RelevelNPCSkills || npc.Configuration.Flags.HasFlag(NpcConfiguration.Flag.IsCharGenFacePreset))
+                return false;
 
+            float skillsPerLevel = Patcher.ModSettings.Value.Unleveling.Options.NPCPointsPerLevel;
             if (npc.PlayerSkills is not null && npc.Configuration.Level is NpcLevel npcLevel)
             {
-                availablePoints = (int)Math.Round(skillsPerLevel * npcLevel.Level);
                 IClassGetter? npcClass = npc.Class.TryResolve(linkCache);
                 if (npcClass is not null)
-                {
-                    float weightSum = 0;
-                    foreach (var skillWeight in npcClass.SkillWeights)
-                        weightSum += skillWeight.Value;
-
-                    foreach(var skillWeight in npcClass.SkillWeights)
-                    {
-                        float skillLevel = 15 + availablePoints * (skillWeight.Value / weightSum);
-                        npc.PlayerSkills.SkillValues[skillWeight.Key] = (byte)skillLevel;
-                    }
-
-                }
+                    DistributeSkills(npcClass.SkillWeights, npc.PlayerSkills.SkillValues, (int)Math.Round(skillsPerLevel * npcLevel.Level));
 
                 return true;
             }

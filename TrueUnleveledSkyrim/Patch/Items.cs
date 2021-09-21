@@ -382,8 +382,8 @@ namespace TrueUnleveledSkyrim.Patch
         private static bool PatchWeaponValues(Weapon weaponEntry)
         {
             if (weaponEntry.Keywords is null || weaponEntry.BasicStats is null || weaponEntry.Data is null || weaponEntry.Critical is null) return false;
-            if (Patcher.ModSettings.Value.ItemAdjustments.MorrowlootifyOptions.SkipArtifacts && weaponEntry.Keywords.Contains(Skyrim.Keyword.DaedricArtifact)) return false;
-            if (Patcher.ModSettings.Value.ItemAdjustments.MorrowlootifyOptions.SkipUniques && weaponEntry.Keywords.Contains(Skyrim.Keyword.MagicDisallowEnchanting)) return false;
+            if (Patcher.ModSettings.Value.ItemAdjustments.Options.SkipArtifacts && weaponEntry.Keywords.Contains(Skyrim.Keyword.DaedricArtifact)) return false;
+            if (Patcher.ModSettings.Value.ItemAdjustments.Options.SkipUniques && weaponEntry.Keywords.Contains(Skyrim.Keyword.MagicDisallowEnchanting)) return false;
 
             bool wasChanged = false;
             foreach (IFormLinkGetter<IKeywordGetter> weaponKeyword in weaponEntry.Keywords)
@@ -415,8 +415,8 @@ namespace TrueUnleveledSkyrim.Patch
         private static bool PatchArmorValues(Armor armorEntry)
         {
             if (armorEntry.Keywords is null) return false;
-            if (Patcher.ModSettings.Value.ItemAdjustments.MorrowlootifyOptions.SkipArtifacts && armorEntry.Keywords.Contains(Skyrim.Keyword.DaedricArtifact)) return false;
-            if (Patcher.ModSettings.Value.ItemAdjustments.MorrowlootifyOptions.SkipUniques && armorEntry.Keywords.Contains(Skyrim.Keyword.MagicDisallowEnchanting)) return false;
+            if (Patcher.ModSettings.Value.ItemAdjustments.Options.SkipArtifacts && armorEntry.Keywords.Contains(Skyrim.Keyword.DaedricArtifact)) return false;
+            if (Patcher.ModSettings.Value.ItemAdjustments.Options.SkipUniques && armorEntry.Keywords.Contains(Skyrim.Keyword.MagicDisallowEnchanting)) return false;
 
             bool wasChanged = false;
             foreach(IFormLinkGetter<IKeywordGetter> armorKeyword in armorEntry.Keywords)

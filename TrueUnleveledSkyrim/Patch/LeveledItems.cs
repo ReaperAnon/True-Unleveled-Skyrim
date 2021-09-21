@@ -66,7 +66,7 @@ namespace TrueUnleveledSkyrim.Patch
         // Removes every item from a list other than the highest level one.
         private static bool CullArtifactList(LeveledItem itemList)
         {
-            if (itemList.Entries is null || !Patcher.ModSettings.Value.Unleveling.UnlevelingOptions.UnlevelArtifacts)
+            if (itemList.Entries is null || !Patcher.ModSettings.Value.Unleveling.Options.UnlevelArtifacts)
                 return false;
 
             bool wasChanged = false;
@@ -89,8 +89,8 @@ namespace TrueUnleveledSkyrim.Patch
             if (itemData is null)
                 return false;
 
-            int maxLevel = Patcher.ModSettings.Value.Unleveling.UnlevelingOptions.MaxItemLevel;
-            int minLevel = Patcher.ModSettings.Value.Unleveling.UnlevelingOptions.MinItemLevel;
+            int maxLevel = Patcher.ModSettings.Value.Unleveling.Options.MaxItemLevel;
+            int minLevel = Patcher.ModSettings.Value.Unleveling.Options.MinItemLevel;
             bool shouldRemove = itemData.Level > maxLevel && maxLevel != 0 || itemData.Level < minLevel;
 
             if(itemData.Level == maxLevel && !shouldRemove)
