@@ -10,6 +10,7 @@ using Mutagen.Bethesda.Skyrim;
 using Mutagen.Bethesda.FormKeys.SkyrimSE;
 using Mutagen.Bethesda.Synthesis;
 using Mutagen.Bethesda.Plugins.Cache;
+using Mutagen.Bethesda.Plugins.Records;
 
 namespace TrueUnleveledSkyrim.Patch
 {
@@ -490,6 +491,14 @@ namespace TrueUnleveledSkyrim.Patch
                     state.PatchMod.Weapons.Set(weaponCopy);
                     // Console.WriteLine("Patched weapon: " + weaponCopy.EditorID);
                 }
+            }
+
+            if(Patcher.ModSettings.Value.ItemAdjustments.Options.TemperingDebuff)
+            {
+                var armorGMST = state.PatchMod.GameSettings.AddNewFloat();
+                var weaponGMST = state.PatchMod.GameSettings.AddNewFloat();
+                armorGMST.EditorID = "fSmithingArmorMax"; weaponGMST.EditorID = "fSmithingWeaponMax";
+                armorGMST.Data = new float?(6); weaponGMST.Data = new float?(6);
             }
 
             Console.WriteLine("Processed " + processedRecords + " weapons in total.");

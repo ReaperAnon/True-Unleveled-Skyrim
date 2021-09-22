@@ -92,7 +92,7 @@ namespace TrueUnleveledSkyrim.Config
         public bool SkipUniques { get; set; } = false;
 
 
-        [Tooltip("NOT YET IMPLEMENTED - If enabled, tempering is made about 40% less effective across the board for balancing reasons, making way for the artifacts to shine without Smithing being mandatory.")]
+        [Tooltip("If enabled, tempering is made about 40% less effective across the board for balancing reasons, making way for the artifacts to shine without Smithing being mandatory.")]
         public bool TemperingDebuff { get; set; } = true;
     }
 }
