@@ -1,68 +1,70 @@
-[
+{
+  "Zones": [
     {
-        "Keys": [
-            "DLC2AbandonedLodge",
-            "DLC2BujoldsRetreat",
-            "DLC2POI13",
-            "DLC2DremoraShop",
-            "DLC2RamshackleTradingPost",
-            "DLC2HoldingCellBard",
-            "Doomstone"
-        ],
-        "ForbiddenKeys": [],
-        "MinLevel": 1,
-        "MaxLevel": 10,
-        "Range": 2
+      "Keys": [
+        "DLC2AbandonedLodge",
+        "DLC2BujoldsRetreat",
+        "DLC2POI13",
+        "DLC2DremoraShop",
+        "DLC2RamshackleTradingPost",
+        "DLC2HoldingCellBard",
+        "Doomstone"
+      ],
+      "ForbiddenKeys": [],
+      "MinLevel": 1,
+      "MaxLevel": 10,
+      "Range": 2
     },
     {
-        "Keys": [
-            "StendarrsBeacon",
-            "HalloftheVigilant"
-        ],
-        "ForbiddenKeys": [],
-        "MinLevel": 10,
-        "MaxLevel": 20,
-        "Range": 5
+      "Keys": [
+        "StendarrsBeacon",
+        "HalloftheVigilant"
+      ],
+      "ForbiddenKeys": [],
+      "MinLevel": 10,
+      "MaxLevel": 20,
+      "Range": 5
     },
     {
-        "Keys": [
-            "ThalmorEmbassy",
-            "DarkBrotherhoodSancZone"
-        ],
-        "ForbiddenKeys": [],
-        "MinLevel": 15,
-        "MaxLevel": 35,
-        "Range": 5
+      "Keys": [
+        "ThalmorEmbassy",
+        "DarkBrotherhoodSancZone"
+      ],
+      "ForbiddenKeys": [],
+      "MinLevel": 15,
+      "MaxLevel": 35,
+      "Range": 5
     },
     {
-        "Keys": [
-            "DLC1VampireCastle"
-        ],
-        "ForbiddenKeys": [],
-        "MinLevel": 40,
-        "MaxLevel": 55,
-        "Range": 8
+      "Keys": [
+        "DLC1VampireCastle"
+      ],
+      "ForbiddenKeys": [],
+      "MinLevel": 40,
+      "MaxLevel": 55,
+      "Range": 8
     },
     {
-        "Keys": [
-            "DLC1Falmer",
-            "DLC1zFalmer",
-            "TwilightSepulcherZone",
-            "DLC1ForebearsHoldout"
-        ],
-        "ForbiddenKeys": [],
-        "MinLevel": 50,
-        "MaxLevel": 70,
-        "Range": 10
+      "Keys": [
+        "DLC1Falmer",
+        "DLC1zFalmer",
+        "TwilightSepulcherZone",
+        "DLC1ForebearsHoldout"
+      ],
+      "ForbiddenKeys": [],
+      "MinLevel": 50,
+      "MaxLevel": 70,
+      "Range": 10
     },
     {
-        "Keys": [
-            "DLC2Book"
-        ],
-        "ForbiddenKeys": [],
-        "MinLevel": 70,
-        "MaxLevel": 100,
-        "Range": 15,
-        "EnableCombatBoundary": true
+      "Keys": [
+        "DLC2Book"
+      ],
+      "ForbiddenKeys": [],
+      "MinLevel": 70,
+      "MaxLevel": 100,
+      "Range": 15,
+      "EnableCombatBoundary": true
     }
-]
+  ]
+}

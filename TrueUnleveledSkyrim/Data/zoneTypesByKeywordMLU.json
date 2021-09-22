@@ -1,123 +1,136 @@
 {
     "Zones": [
-        {
-            "Keywords": [
-                "LocTypeHabitation",
-                "LocTypeDwelling"
-            ],
-            "MinLevel": 1,
-            "MaxLevel": 10,
-            "Range": 2
-        },
-        {
-            "Keywords": [
-                "LocSetCave",
-                "LocTypeAnimalDen"
-            ],
-            "MinLevel": 5,
-            "MaxLevel": 15,
-            "Range": 3
-        },
-        {
-            "Keywords": [
-                "LocTypeMilitaryFort",
-                "LocTypeBanditCamp"
-            ],
-            "MinLevel": 10,
-            "MaxLevel": 20,
-            "Range": 4
-        },
-        {
-            "Keywords": [
-                "CWGarrison",
-                "LocTypeDungeon",
-                "LocTypeJail"
-            ],
-            "MinLevel": 15,
-            "MaxLevel": 25,
-            "Range": 5
-        },
-        {
-            "Keywords": [
-                "LocTypeShip",
-                "LocTypeShipwreck"
-            ],
-            "MinLevel": 20,
-            "MaxLevel": 30,
-            "Range": 5
-        },
-        {
-            "Keywords": [
-                "LocTypeWarlockLair",
-                "LocTypeSprigganGrove"
-            ],
-            "MinLevel": 25,
-            "MaxLevel": 35,
-            "Range": 5
-        },
-        {
-            "Keywords": [
-                "LocTypeForswornCamp",
-                "LocTypeHagravenNest"
-            ],
-            "MinLevel": 30,
-            "MaxLevel": 45,
-            "Range": 8
-        },
-        {
-            "Keywords": [
-                "LocSetCave",
-                "LocSetNordicRuin",
-                "LocTypeDraugrCrypt"
-            ],
-            "MinLevel": 35,
-            "MaxLevel": 50,
-            "Range": 8
-        },
-        {
-            "Keywords": [
-                "LocTypeWerewolfLair",
-                "LocTypeVampireLair"
-            ],
-            "MinLevel": 40,
-            "MaxLevel": 55,
-            "Range": 8
-        },
-        {
-            "Keywords": [
-                "LocTypeDwarvenAutomatons",
-                "DLC2LocTypeRieklingCamp"
-            ],
-            "MinLevel": 50,
-            "MaxLevel": 70,
-            "Range": 10
-        },
-        {
-            "Keywords": [
-                "LocTypeFalmerHive",
-                "LocTypeWerebearLair"
-            ],
-            "MinLevel": 55,
-            "MaxLevel": 75,
-            "Range": 10
-        },
-        {
-            "Keywords": [
-                "LocTypeDragonLair",
-                "DLC2LocTypePillar"
-            ],
-            "MinLevel": 65,
-            "MaxLevel": 85,
-            "Range": 10
-        },
-        {
-            "Keywords": [
-                "LocTypeDragonPriestLair",
-                "LocTypeGiantCamp"
-            ],
-            "MinLevel": 70,
-            "MaxLevel": 100,
-            "Range": 15
-        }
+      {
+        "Keys": [
+          "LocTypeHabitation",
+          "LocTypeDwelling"
+        ],
+        "ForbiddenKeys": [],
+        "MinLevel": 1,
+        "MaxLevel": 10,
+        "Range": 2
+      },
+      {
+        "Keys": [
+          "LocSetCave",
+          "LocTypeAnimalDen"
+        ],
+        "ForbiddenKeys": [],
+        "MinLevel": 5,
+        "MaxLevel": 15,
+        "Range": 3
+      },
+      {
+        "Keys": [
+          "LocTypeMilitaryFort",
+          "LocTypeBanditCamp"
+        ],
+        "ForbiddenKeys": [],
+        "MinLevel": 10,
+        "MaxLevel": 20,
+        "Range": 4
+      },
+      {
+        "Keys": [
+          "CWGarrison",
+          "LocTypeDungeon",
+          "LocTypeJail"
+        ],
+        "ForbiddenKeys": [],
+        "MinLevel": 15,
+        "MaxLevel": 25,
+        "Range": 5
+      },
+      {
+        "Keys": [
+          "LocTypeShip",
+          "LocTypeShipwreck"
+        ],
+        "ForbiddenKeys": [],
+        "MinLevel": 20,
+        "MaxLevel": 30,
+        "Range": 5
+      },
+      {
+        "Keys": [
+          "LocTypeWarlockLair",
+          "LocTypeSprigganGrove"
+        ],
+        "ForbiddenKeys": [],
+        "MinLevel": 25,
+        "MaxLevel": 35,
+        "Range": 5
+      },
+      {
+        "Keys": [
+          "LocTypeForswornCamp",
+          "LocTypeHagravenNest"
+        ],
+        "ForbiddenKeys": [],
+        "MinLevel": 30,
+        "MaxLevel": 45,
+        "Range": 8
+      },
+      {
+        "Keys": [
+          "LocSetCave",
+          "LocSetNordicRuin",
+          "LocTypeDraugrCrypt"
+        ],
+        "ForbiddenKeys": [],
+        "MinLevel": 35,
+        "MaxLevel": 50,
+        "Range": 8
+      },
+      {
+        "Keys": [
+          "LocTypeWerewolfLair",
+          "LocTypeVampireLair"
+        ],
+        "ForbiddenKeys": [],
+        "MinLevel": 40,
+        "MaxLevel": 55,
+        "Range": 8
+      },
+      {
+        "Keys": [
+          "LocTypeDwarvenAutomatons",
+          "DLC2LocTypeRieklingCamp"
+        ],
+        "ForbiddenKeys": [],
+        "MinLevel": 50,
+        "MaxLevel": 70,
+        "Range": 10
+      },
+      {
+        "Keys": [
+          "LocTypeFalmerHive",
+          "LocTypeWerebearLair"
+        ],
+        "ForbiddenKeys": [],
+        "MinLevel": 55,
+        "MaxLevel": 75,
+        "Range": 10
+      },
+      {
+        "Keys": [
+          "LocTypeDragonLair",
+          "DLC2LocTypePillar"
+        ],
+        "ForbiddenKeys": [],
+        "MinLevel": 65,
+        "MaxLevel": 85,
+        "Range": 10
+      },
+      {
+        "Keys": [
+          "LocTypeDragonPriestLair",
+          "LocTypeGiantCamp"
+        ],
+        "ForbiddenKeys": [],
+        "MinLevel": 70,
+        "MaxLevel": 100,
+        "Range": 15
+      }
     ]
 }

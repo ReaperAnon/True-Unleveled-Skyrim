@@ -81,7 +81,7 @@ namespace TrueUnleveledSkyrim.Config
         [JsonProperty] public short MinLevel { get; set; }
         [JsonProperty] public short MaxLevel { get; set; }
         [JsonProperty] public short Range { get; set; }
-        [JsonProperty] public bool EnableCombatBoundary { get; set; }
+        [JsonProperty] public bool? EnableCombatBoundary { get; set; }
     }
 
     public class ZoneList : ConfigType

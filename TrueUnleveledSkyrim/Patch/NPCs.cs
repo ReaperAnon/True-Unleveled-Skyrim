@@ -90,7 +90,6 @@ namespace TrueUnleveledSkyrim.Patch
         // Gives the npcs who have the appropriate factions defined in the NPCsByFaction.json file (faction EDID does not have to be complete) the custom level or level range given.
         private static bool GetNPCLevelByFaction(Npc npc, ILinkCache linkCache, short levelModAdd, float levelModMult)
         {
-            Random randomizer = new();
             foreach (RankPlacement? rankEntry in npc.Factions)
             {
                 IFactionGetter? faction = rankEntry.Faction.TryResolve(linkCache);
@@ -114,7 +113,7 @@ namespace TrueUnleveledSkyrim.Patch
 
                             if (willChange)
                             {
-                                short newLevel = (short)(dataSet.Level ?? randomizer.Next((int)dataSet.MinLevel!, (int)dataSet.MaxLevel!));
+                                short newLevel = (short)(dataSet.Level ?? Patcher.Randomizer.Next((int)dataSet.MinLevel!, (int)dataSet.MaxLevel!));
                                 npc.Configuration.Level = new NpcLevel() { Level = (short)Math.Max(newLevel * levelModMult + levelModAdd, 1) };
                                 return true;
                             }
@@ -195,12 +194,6 @@ namespace TrueUnleveledSkyrim.Patch
             return wasChanged;
         }
 
-        class WeightPair
-        {
-            public Skill Skill { get; set; }
-            public float Weight { get; set; }
-        }
-
         private static void DistributeSkills(IReadOnlyDictionary<Skill, byte> skillWeights, IDictionary<Skill, byte> skillValues, int skillPoints)
         {
             float weightSum = 0;
@@ -233,11 +226,11 @@ namespace TrueUnleveledSkyrim.Patch
 
         private static bool RelevelNPCSkills(Npc npc, ILinkCache linkCache)
         {
-            if (!Patcher.ModSettings.Value.Unleveling.Options.RelevelNPCSkills || npc.Configuration.Flags.HasFlag(NpcConfiguration.Flag.IsCharGenFacePreset))
+            if (npc.Configuration.Flags.HasFlag(NpcConfiguration.Flag.IsCharGenFacePreset))
                 return false;
 
-            float skillsPerLevel = Patcher.ModSettings.Value.Unleveling.Options.NPCPointsPerLevel;
-            if (npc.PlayerSkills is not null && npc.Configuration.Level is NpcLevel npcLevel)
+            float skillsPerLevel = Patcher.ModSettings.Value.Unleveling.Options.NPCSkillsPerLevel;
+            if (skillsPerLevel > 0 && npc.PlayerSkills is not null && npc.Configuration.Level is NpcLevel npcLevel)
             {
                 IClassGetter? npcClass = npc.Class.TryResolve(linkCache);
                 if (npcClass is not null)

@@ -2,8 +2,14 @@
   "Unleveling": {
     "UnlevelGame": true,
     "Options": {
-      "RelevelNPCSkills": true,
-      "NPCPointsPerLevel": 9.5,
+      "UseMorrowlootZoneBalance": true,
+      "StaticZoneLevels": true,
+      "EasySpawnLevelMult": 0.75,
+      "NormalSpawnLevelMult": 1.0,
+      "HardSpawnLevelMult": 1.25,
+      "VeryHardSpawnLevelMult": 1.5,
+      "NPCPerksPerLevel": 1.0,
+      "NPCSkillsPerLevel": 9.5,
       "NPCMaxSkillLevel": 100,
       "MaxItemLevel": 27,
       "MinItemLevel": 0,

@@ -35,12 +35,37 @@ namespace TrueUnleveledSkyrim.Config
 
     public class TUSConfig_Items
     {
-        [Tooltip("If enabled, NPCs will have their skills changed to be in accordance with their level and class, very useful if using a skill-based damage multiplier mod.")]
-        public bool RelevelNPCSkills { get; set; } = true;
+        [Tooltip("If enabled, the patcher will use Morrowloot Ultimate-like encounter zone level values for balancing.")]
+        public bool UseMorrowlootZoneBalance { get; set; } = true;
 
 
-        [Tooltip("The amount of skillpoints enemies get per every level they have. The points are distributed among their skills based on their class and their major and minor skills. All of their skills start at 15, these are applied on top of that.")]
-        public float NPCPointsPerLevel { get; set; } = 9.5f;
+        [Tooltip("If enabled, zones will not have different minimum and maximum levels and will not scale even minimally with the player, regardless of the defined ranges in the used configuration files.")]
+        public bool StaticZoneLevels { get; set; } = false;
+
+
+        [Tooltip("The level multiplier for easy spawns in encounter zones. At default, easy spawns will have a level that is 0.75x the level of the area itself. Vanilla value is 0.33.")]
+        public float EasySpawnLevelMult { get; set; } = 0.75f;
+
+
+        [Tooltip("The level multiplier for normal spawns in encounter zones. At default, normal spawns will have a level that is 1x the level of the area itself. Vanilla value is 0.67.")]
+        public float NormalSpawnLevelMult { get; set; } = 1f;
+
+
+        [Tooltip("The level multiplier for hard spawns in encounter zones. At default, hard spawns will have a level that is 1.25x the level of the area itself. Vanilla value is 1.")]
+        public float HardSpawnLevelMult { get; set; } = 1.25f;
+
+
+        [Tooltip("The level multiplier for very hard spawns in encounter zones. At default, very hard spawns will have a level that is 1.5x the level of the area itself. Vanilla value is 1.25.")]
+        public float VeryHardSpawnLevelMult { get; set; } = 1.5f;
+
+
+        [Tooltip("The amount of perk points NPCs get per every level they have. Set to 0 to not grant them any perks. The perks are distributed according to their requirements.")]
+        public float NPCPerksPerLevel { get; set; } = 1f;
+
+
+        [Tooltip("The amount of skillpoints NPCs get per every level they have. Set to 0 to not change NPC skill levels. The points are distributed among their skills based on their class and their major and minor skills. All of their skills start at 15, these are applied on top of that.")]
+        public float NPCSkillsPerLevel { get; set; } = 9.5f;
+
 
         [Tooltip("The maximum level an NPC's skills can have. If increased, high level NPCs can have some skills above level 100.")]
         public byte NPCMaxSkillLevel { get; set; } = 100;

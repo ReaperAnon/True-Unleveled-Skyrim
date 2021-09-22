@@ -13,6 +13,7 @@ namespace TrueUnleveledSkyrim
 {
     public class Patcher
     {
+        public static Random Randomizer = new();
         public static Lazy<TUSConfig> ModSettings = null!;
 
         public static ILinkCache LinkCache { get; set; } = null!;
@@ -36,6 +37,8 @@ namespace TrueUnleveledSkyrim
                 OutfitsPatcher.PatchOutfits(state);
                 NPCsPatcher.PatchNPCs(state);
             }
+
+            ZonesPatcher.PatchZones(state);
 
             if (ModSettings.Value.ItemAdjustments.MorrowlootifyItems)
                 ItemsPatcher.PatchItems(state);
