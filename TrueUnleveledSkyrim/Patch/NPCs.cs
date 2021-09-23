@@ -27,31 +27,28 @@ namespace TrueUnleveledSkyrim.Patch
         private static void GetLevelMultiplier(Npc npc, ILinkCache linkCache, out short levelModAdd, out float levelModMult)
         {
             levelModAdd = 0; levelModMult = 1;
-            IRaceGetter? raceGetter = npc.Race.TryResolve(linkCache);
-
-            if (raceGetter is null || raceGetter.EditorID is null) return;
-            foreach(var dataSet in raceModifiers!.Data)
+            if (!npc.Race.TryResolve(linkCache, out var raceGetter) || raceGetter.EditorID is null) return;
+            foreach (RaceEntries? dataSet in raceModifiers!.Data)
             {
-                foreach (var raceKey in dataSet.Keys)
+                foreach (string? raceKey in dataSet.Keys)
                 {
                     if (raceGetter.EditorID.Contains(raceKey, StringComparison.OrdinalIgnoreCase))
                     {
                         bool willChange = true;
                         foreach (var exclusionKey in dataSet.ForbiddenKeys)
                         {
-                            willChange = false;
-                            break;
+                            if(raceGetter.EditorID.Contains(exclusionKey, StringComparison.OrdinalIgnoreCase))
+                                willChange = false;
                         }
 
                         if (willChange)
                         {
                             levelModAdd = dataSet.LevelModifierAdd ?? 0;
                             levelModMult = dataSet.LevelModifierMult ?? 1;
-                            break;
                         }
-                    }
 
-                    return;
+                        return;
+                    }
                 }
             }
         }
@@ -59,20 +56,17 @@ namespace TrueUnleveledSkyrim.Patch
         // Gives the npcs defined in the NPCsByEDID.json file (EDID does not have to be complete) the custom level given.
         private static bool GetNPCLevelByEDID(Npc npc, short levelModAdd, float levelModMult)
         {
-            foreach (var dataSet in customNPCsByID!.NPCs)
+            foreach (NPCEDIDEntry? dataSet in customNPCsByID!.NPCs)
             {
-                foreach (var npcKey in dataSet.Keys)
+                foreach (string? npcKey in dataSet.Keys)
                 {
                     if (npc.EditorID!.Contains(npcKey, StringComparison.OrdinalIgnoreCase))
                     {
                         bool willChange = true;
-                        foreach (var exclusionKey in dataSet.ForbiddenKeys)
+                        foreach (string? exclusionKey in dataSet.ForbiddenKeys)
                         {
                             if (npc.EditorID!.Contains(exclusionKey, StringComparison.OrdinalIgnoreCase))
-                            {
                                 willChange = false;
-                                break;
-                            }
                         }
 
                         if (willChange)
@@ -97,20 +91,17 @@ namespace TrueUnleveledSkyrim.Patch
                 IFactionGetter? faction = rankEntry.Faction.TryResolve(linkCache);
 
                 if (faction is null) continue;
-                foreach (var dataSet in customNPCsByFaction!.NPCs)
+                foreach (NPCFactionEntry? dataSet in customNPCsByFaction!.NPCs)
                 {
-                    foreach (var factionKey in dataSet.Keys)
+                    foreach (string? factionKey in dataSet.Keys)
                     {
                         if (faction.EditorID!.Contains(factionKey, StringComparison.OrdinalIgnoreCase))
                         {
                             bool willChange = true;
-                            foreach (var exclusionKey in dataSet.ForbiddenKeys)
+                            foreach (string? exclusionKey in dataSet.ForbiddenKeys)
                             {
                                 if (faction.EditorID.Contains(exclusionKey, StringComparison.OrdinalIgnoreCase))
-                                {
                                     willChange = false;
-                                    break;
-                                }
                             }
 
                             if (willChange)
@@ -179,7 +170,10 @@ namespace TrueUnleveledSkyrim.Patch
                         {
                             LeveledItem? newItem = state.PatchMod.LeveledItems.Where(x => x.EditorID == resolvedItem.EditorID + usedPostfix).FirstOrDefault();
                             if (newItem is not null)
+                            {
                                 entry.Item.Item = newItem.AsLink();
+                                wasChanged = true;
+                            }
                         }
                     }
 
@@ -188,7 +182,10 @@ namespace TrueUnleveledSkyrim.Patch
                     {
                         Outfit? newOutfit = state.PatchMod.Outfits.Where(x => x.EditorID == npcOutfit.EditorID + usedPostfix).FirstOrDefault();
                         if (newOutfit is not null)
+                        {
                             npc.DefaultOutfit = newOutfit.AsNullableLink();
+                            wasChanged = true;
+                        }
                     }
                 }
             }
@@ -360,7 +357,6 @@ namespace TrueUnleveledSkyrim.Patch
                             }
 
                             if (willSkip) continue;
-
                             if (FulfillsPerkConditions(npc, perkEntry, perkWeight.Key, linkCache))
                             {
                                 --perksToSpend;
