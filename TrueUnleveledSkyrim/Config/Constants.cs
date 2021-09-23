@@ -9,7 +9,7 @@ namespace TrueUnleveledSkyrim.Config
     public static class TUSConstants
     {
         // GitHub name of the patcher for the Data folder reference.
-        public static string PatcherName { get; } = "TrueUnleveledSkyrim";
+        public static string PatcherName { get; } = "True-Unleveled-Skyrim";
         public static string DataPath { get; } = "Data/Skyrim Special Edition/";
 
         // List variant postfixes.
