@@ -130,12 +130,14 @@ namespace TrueUnleveledSkyrim.Patch
             if (wasChanged) return true;
             if (npc.Configuration.Level is PcLevelMult pcLevelMult)
             {
-                float lvlMult = pcLevelMult.LevelMult <= 0 ? 1 : pcLevelMult.LevelMult;
+                float lvlMult = (pcLevelMult.LevelMult <= 0) ? 1 : pcLevelMult.LevelMult;
                 short lvlMin = npc.Configuration.CalcMinLevel; short lvlMax = npc.Configuration.CalcMaxLevel;
 
                 bool isUnique = npc.Configuration.Flags.HasFlag(NpcConfiguration.Flag.Unique);
-                if (lvlMax == 0 || lvlMax > 81)
-                    lvlMax = (short)(isUnique ? 81 : (50 + lvlMin) / 2);
+                if(isUnique && (lvlMax == 0 || lvlMax >= 100))
+                        lvlMax = 100;
+                else if(lvlMax == 0 || lvlMax > 80)
+                    lvlMax = 80;
 
                 wasChanged = true;
                 npc.Configuration.Level = new NpcLevel()
@@ -160,7 +162,7 @@ namespace TrueUnleveledSkyrim.Patch
 
             if(npc.Configuration.Level is NpcLevel npcLevel)
             {
-                string usedPostfix = npcLevel.Level < 10 ? TUSConstants.WeakPostfix : npcLevel.Level > 25 ? TUSConstants.StrongPostfix : "";
+                string usedPostfix = npcLevel.Level < 13 ? TUSConstants.WeakPostfix : npcLevel.Level > 27 ? TUSConstants.StrongPostfix : "";
                 if (!usedPostfix.IsNullOrEmpty())
                 {
                     foreach (ContainerEntry? entry in npc.Items.EmptyIfNull())
