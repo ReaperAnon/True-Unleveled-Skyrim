@@ -21,7 +21,7 @@ namespace TrueUnleveledSkyrim.Config
         public bool UnlevelGame { get; set; } = true;
 
 
-        public TUSConfig_Items Options { get; set; } = new TUSConfig_Items();
+        public TUSConfig_Unleveling Options { get; set; } = new TUSConfig_Unleveling();
     }
 
     public class TUSConfig_ItemAdjustments
@@ -33,14 +33,36 @@ namespace TrueUnleveledSkyrim.Config
         public TUSConfig_Morrowloot Options { get; set; } = new TUSConfig_Morrowloot();
     }
 
+    public class TUSConfig_Unleveling
+    {
+        public TUSConfig_Zones Zones { get; set; } = new();
+        [SettingName("NPCs")]
+        public TUSConfig_NPCs NPCs { get; set; } = new();
+        public TUSConfig_Items Items { get; set; } = new();
+    }
+
     public class TUSConfig_Items
+    {
+        [Tooltip("The level from which items are purged from leveled lists. Setting it to 0 means there is no upper level limit.\nTiers (based on vanilla leveled lists):\n1 - Iron\n2 - Steel\n6 - Orcish\n12 - Dwarven\n19 - Elven\n27 - Glass\n36 - Ebony\n46 - Daedric")]
+        public int MaxItemLevel { get; set; } = 27;
+
+
+        [Tooltip("The level below which items are purged from leveled lists. Setting it to 0 means there is no lower level limit.\nTiers (based on vanilla leveled lists):\n1 - Iron\n2 - Steel\n6 - Orcish\n12 - Dwarven\n19 - Elven\n27 - Glass\n36 - Ebony\n46 - Daedric")]
+        public int MinItemLevel { get; set; } = 0;
+
+
+        [Tooltip("If enabled, artifact items will always have the highest level variant in the leveled list.")]
+        public bool UnlevelArtifacts { get; set; } = true;
+    }
+
+    public class TUSConfig_Zones
     {
         [Tooltip("If enabled, the patcher will use Morrowloot Ultimate-like encounter zone level values for balancing.")]
         public bool UseMorrowlootZoneBalance { get; set; } = true;
 
 
         [Tooltip("If enabled, zones will not have different minimum and maximum levels and will not scale even minimally with the player, regardless of the defined ranges in the used configuration files.")]
-        public bool StaticZoneLevels { get; set; } = false;
+        public bool StaticZoneLevels { get; set; } = true;
 
 
         [Tooltip("The level multiplier for easy spawns in encounter zones. At default, easy spawns will have a level that is 0.75x the level of the area itself. Vanilla value is 0.33.")]
@@ -57,6 +79,12 @@ namespace TrueUnleveledSkyrim.Config
 
         [Tooltip("The level multiplier for very hard spawns in encounter zones. At default, very hard spawns will have a level that is 1.5x the level of the area itself. Vanilla value is 1.25.")]
         public float VeryHardSpawnLevelMult { get; set; } = 1.5f;
+    }
+
+    public class TUSConfig_NPCs
+    {
+        [Tooltip("If enabled, NPCs will have all their previously assigned perks removed before getting new ones added.")]
+        public bool RemoveOldPerks { get; set; } = true;
 
 
         [Tooltip("The amount of perk points NPCs get per every level they have. Set to 0 to not grant them any perks. The perks are distributed according to their requirements.")]
@@ -69,19 +97,8 @@ namespace TrueUnleveledSkyrim.Config
 
         [Tooltip("The maximum level an NPC's skills can have. If increased, high level NPCs can have some skills above level 100.")]
         public byte NPCMaxSkillLevel { get; set; } = 100;
-
-
-        [Tooltip("The level from which items are purged from leveled lists. Setting it to 0 means there is no upper level limit.\nTiers (based on vanilla leveled lists):\n1 - Iron\n2 - Steel\n6 - Orcish\n12 - Dwarven\n19 - Elven\n27 - Glass\n36 - Ebony\n46 - Daedric")]
-        public int MaxItemLevel { get; set; } = 27;
-
-
-        [Tooltip("The level below which items are purged from leveled lists. Setting it to 0 means there is no lower level limit.\nTiers (based on vanilla leveled lists):\n1 - Iron\n2 - Steel\n6 - Orcish\n12 - Dwarven\n19 - Elven\n27 - Glass\n36 - Ebony\n46 - Daedric")]
-        public int MinItemLevel { get; set; } = 0;
-
-
-        [Tooltip("If enabled, artifact items will always have the highest level variant in the leveled list.")]
-        public bool UnlevelArtifacts { get; set; } = true;
     }
+
     public class TUSConfig_Morrowloot
     {
         [Tooltip("If enabled, skips stat adjusment on all items tagged as a \"Daedric Artifact\".")]

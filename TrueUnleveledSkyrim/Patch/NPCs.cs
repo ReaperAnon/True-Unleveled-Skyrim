@@ -8,6 +8,7 @@ using Mutagen.Bethesda.Skyrim;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
+using Mutagen.Bethesda.FormKeys.SkyrimSE;
 
 using TrueUnleveledSkyrim.Config;
 using System.Collections.Generic;
@@ -16,6 +17,7 @@ namespace TrueUnleveledSkyrim.Patch
 {
     class NPCsPatcher
     {
+        private static ExcludedPerks? excludedPerks;
         private static ExcludedNPCs? excludedNPCs;
         private static NPCEDIDs? customNPCsByID;
         private static NPCFactions? customNPCsByFaction;
@@ -198,7 +200,7 @@ namespace TrueUnleveledSkyrim.Patch
         {
             float weightSum = 0;
             bool firstPass = true;
-            byte maxSkill = Patcher.ModSettings.Value.Unleveling.Options.NPCMaxSkillLevel;
+            byte maxSkill = Patcher.ModSettings.Value.Unleveling.Options.NPCs.NPCMaxSkillLevel;
             List<KeyValuePair<Skill, byte>> tempWeights = skillWeights.ToList();
             
             do
@@ -226,10 +228,7 @@ namespace TrueUnleveledSkyrim.Patch
 
         private static bool RelevelNPCSkills(Npc npc, ILinkCache linkCache)
         {
-            if (npc.Configuration.Flags.HasFlag(NpcConfiguration.Flag.IsCharGenFacePreset))
-                return false;
-
-            float skillsPerLevel = Patcher.ModSettings.Value.Unleveling.Options.NPCSkillsPerLevel;
+            float skillsPerLevel = Patcher.ModSettings.Value.Unleveling.Options.NPCs.NPCSkillsPerLevel;
             if (skillsPerLevel > 0 && npc.PlayerSkills is not null && npc.Configuration.Level is NpcLevel npcLevel)
             {
                 IClassGetter? npcClass = npc.Class.TryResolve(linkCache);
@@ -242,18 +241,173 @@ namespace TrueUnleveledSkyrim.Patch
             return false;
         }
 
+        private static bool GetTreeFromSkill(Skill activeSkill, ILinkCache linkCache, out IActorValueInformationGetter? actorValue)
+        {
+            switch(activeSkill)
+            {
+                case Skill.Alchemy: actorValue = Skyrim.ActorValueInformation.AVAlchemy.TryResolve(linkCache); return true;
+                case Skill.Alteration: actorValue = Skyrim.ActorValueInformation.AVAlteration.TryResolve(linkCache); return true;
+                case Skill.Archery: actorValue = Skyrim.ActorValueInformation.AVMarksman.TryResolve(linkCache); return true;
+                case Skill.Block: actorValue = Skyrim.ActorValueInformation.AVBlock.TryResolve(linkCache); return true;
+                case Skill.Conjuration: actorValue = Skyrim.ActorValueInformation.AVConjuration.TryResolve(linkCache); return true;
+                case Skill.Destruction: actorValue = Skyrim.ActorValueInformation.AVDestruction.TryResolve(linkCache); return true;
+                case Skill.Enchanting: actorValue = Skyrim.ActorValueInformation.AVEnchanting.TryResolve(linkCache); return true;
+                case Skill.HeavyArmor: actorValue = Skyrim.ActorValueInformation.AVHeavyArmor.TryResolve(linkCache); return true;
+                case Skill.Illusion: actorValue = Skyrim.ActorValueInformation.AVMysticism.TryResolve(linkCache); return true;
+                case Skill.LightArmor: actorValue = Skyrim.ActorValueInformation.AVLightArmor.TryResolve(linkCache); return true;
+                case Skill.Lockpicking: actorValue = Skyrim.ActorValueInformation.AVLockpicking.TryResolve(linkCache); return true;
+                case Skill.OneHanded: actorValue = Skyrim.ActorValueInformation.AVOneHanded.TryResolve(linkCache); return true;
+                case Skill.Pickpocket: actorValue = Skyrim.ActorValueInformation.AVPickpocket.TryResolve(linkCache); return true;
+                case Skill.Restoration: actorValue = Skyrim.ActorValueInformation.AVRestoration.TryResolve(linkCache); return true;
+                case Skill.Smithing: actorValue = Skyrim.ActorValueInformation.AVSmithing.TryResolve(linkCache); return true;
+                case Skill.Sneak: actorValue = Skyrim.ActorValueInformation.AVSneak.TryResolve(linkCache); return true;
+                case Skill.Speech: actorValue = Skyrim.ActorValueInformation.AVSpeechcraft.TryResolve(linkCache); return true;
+                case Skill.TwoHanded: actorValue = Skyrim.ActorValueInformation.AVTwoHanded.TryResolve(linkCache); return true;
+                default: actorValue = null;  return false;
+            }
+        }
+
+        private static bool PerformCompare<T>(IConditionGetter? perkCondition, T lValue, T rValue ) where T : IComparable<T>
+        {
+            if (perkCondition is null) return false;
+            switch(perkCondition.CompareOperator)
+            {
+                case CompareOperator.EqualTo:               return lValue.CompareTo(rValue) ==  0;
+                case CompareOperator.GreaterThan:           return lValue.CompareTo(rValue) >   0;
+                case CompareOperator.GreaterThanOrEqualTo:  return lValue.CompareTo(rValue) >=  0;
+                case CompareOperator.LessThan:              return lValue.CompareTo(rValue) <   0;
+                case CompareOperator.LessThanOrEqualTo:     return lValue.CompareTo(rValue) <=  0;
+                case CompareOperator.NotEqualTo:            return lValue.CompareTo(rValue) !=  0;
+                    default: return false;
+            }
+        }
+
+        private static bool FulfillsPerkConditions(Npc npc, IPerkGetter perkEntry, Skill currSkill, ILinkCache linkCache)
+        {
+            // Check if NPC already has the perk or not.
+            if (npc.Perks!.Where(x => x.Perk.Equals(perkEntry.AsLink())).Any()) return false;
+            
+            bool fulfillsConditions = true;
+            foreach(IConditionGetter? perkCondition in perkEntry.Conditions)
+            {
+                if (perkCondition is null) continue;
+                if (perkCondition.DeepCopy() is ConditionFloat perkCondFloat && perkCondFloat.Data is FunctionConditionData funcCond)
+                {
+                    if (funcCond.Function == Condition.Function.GetBaseActorValue && funcCond.ParameterOneNumber == (int)currSkill)
+                        fulfillsConditions = fulfillsConditions && PerformCompare(perkCondFloat, npc.PlayerSkills!.SkillValues[currSkill], perkCondFloat.ComparisonValue); //npc.PlayerSkills!.SkillValues[currSkill] >= perkCondFloat.ComparisonValue;
+                    else if (funcCond.Function == Condition.Function.HasPerk && funcCond.ParameterOneRecord.TryResolve<IPerkGetter>(linkCache, out var requiredPerk))
+                    {
+                        if(perkCondFloat.CompareOperator == CompareOperator.EqualTo && perkCondFloat.ComparisonValue == 1 || perkCondFloat.CompareOperator == CompareOperator.NotEqualTo && perkCondFloat.ComparisonValue == 0)
+                            fulfillsConditions = fulfillsConditions && npc.Perks!.Where(x => x.Perk.Equals(requiredPerk.AsLink())).Any();
+                        else if(perkCondFloat.CompareOperator == CompareOperator.EqualTo && perkCondFloat.ComparisonValue == 0 || perkCondFloat.CompareOperator == CompareOperator.NotEqualTo && perkCondFloat.ComparisonValue == 1)
+                            fulfillsConditions = fulfillsConditions && !npc.Perks!.Where(x => x.Perk.Equals(requiredPerk.AsLink())).Any();
+                    }
+                }
+                else return false;
+            }
+            
+            return fulfillsConditions;
+        }
+
+        private static bool DistributeNPCPerks(Npc npc, ILinkCache linkCache)
+        {
+            bool removeOldPerks = Patcher.ModSettings.Value.Unleveling.Options.NPCs.RemoveOldPerks;
+            float perksPerLevel = Patcher.ModSettings.Value.Unleveling.Options.NPCs.NPCPerksPerLevel;
+            if(perksPerLevel > 0)
+            {
+                if (npc.PlayerSkills is null) return false;
+                if (!npc.Class.TryResolve<IClassGetter>(linkCache, out IClassGetter? npcClass)) return false;
+                if (!npc.Race.TryResolve<IRaceGetter>(linkCache, out IRaceGetter? npcRace)) return false;
+                if (!npcRace.HasKeyword(Skyrim.Keyword.ActorTypeNPC) && !npcRace.HasKeyword(Skyrim.Keyword.ActorTypeUndead)) return false;
+
+                if (npc.Configuration.Level is NpcLevel npcLevel)
+                    perksPerLevel *= npcLevel.Level;
+
+                if (removeOldPerks || npc.Perks is null)
+                    npc.Perks = new();
+                
+                List<KeyValuePair<Skill, byte>> perkDistribution = npcClass.SkillWeights.ToList();
+                float weightSum = perkDistribution.Sum(x => x.Value);
+                int perkOverflow = 0;
+                foreach(KeyValuePair<Skill, byte> perkWeight in perkDistribution)
+                {
+                    if (perkWeight.Value <= 0) continue;
+
+                    byte perksToSpend = (byte)Math.Round(perkOverflow + perksPerLevel * (perkWeight.Value / weightSum));
+                    if (perksToSpend <= 0) continue;
+                    if (!GetTreeFromSkill(perkWeight.Key, linkCache, out var perkTree) || perkTree!.PerkTree is null) continue;
+
+                    while(perksToSpend > 0)
+                    {
+                        bool wasPerkAdded = false;
+                        foreach(IActorValuePerkNodeGetter? perkNode in perkTree.PerkTree)
+                        {
+                            if (perksToSpend <= 0) break;
+                            if (!perkNode.Perk.TryResolve(linkCache, out var perkEntry) || perkEntry.EditorID is null) continue;
+
+                            bool willSkip = false;
+                            foreach(string? perkKey in excludedPerks!.Keys)
+                            {
+                                if(perkEntry.EditorID.Contains(perkKey, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    foreach (string? forbiddenKey in excludedPerks.ForbiddenKeys)
+                                    if (perkEntry.EditorID.Contains(forbiddenKey, StringComparison.OrdinalIgnoreCase))
+                                        break;
+
+                                    willSkip = true;
+                                    break;
+                                }
+                            }
+
+                            if (willSkip) continue;
+
+                            if (FulfillsPerkConditions(npc, perkEntry, perkWeight.Key, linkCache))
+                            {
+                                --perksToSpend;
+                                wasPerkAdded = true;
+                                npc.Perks!.Add(new PerkPlacement() { Perk = perkEntry.AsLink(), Rank = 1 });
+                            }
+
+                            while (perksToSpend > 0 && perkEntry.NextPerk.TryResolve<IPerkGetter>(linkCache, out perkEntry))
+                            {
+                                if (FulfillsPerkConditions(npc, perkEntry, perkWeight.Key, linkCache))
+                                {
+                                    --perksToSpend;
+                                    wasPerkAdded = true;
+                                    npc.Perks!.Add(new PerkPlacement() { Perk = perkEntry.AsLink(), Rank = 1 });
+                                }
+                                else break;
+                            }
+                        }
+
+                        if (!wasPerkAdded)
+                        {
+                            perkOverflow = perksToSpend;
+                            break;
+                        } else perkOverflow = 0;
+                    }
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+
         // Main function to unlevel all NPCs.
         public static void PatchNPCs(IPatcherState<ISkyrimMod, ISkyrimModGetter> state)
         {
+            excludedPerks = JsonHelper.LoadConfig<ExcludedPerks>(TUSConstants.ExcludedPerksPath);
             excludedNPCs = JsonHelper.LoadConfig<ExcludedNPCs>(TUSConstants.ExcludedNPCsPath);
             customNPCsByID = JsonHelper.LoadConfig<NPCEDIDs>(TUSConstants.NPCEDIDPath);
             customNPCsByFaction= JsonHelper.LoadConfig<NPCFactions>(TUSConstants.NPCFactionPath);
             raceModifiers = JsonHelper.LoadConfig<RaceModifiers>(TUSConstants.RaceModifiersPath);
-
+            
             uint processedRecords = 0;
             foreach(INpcGetter? npcGetter in state.LoadOrder.PriorityOrder.Npc().WinningOverrides())
             {
                 if (npcGetter.EditorID is null) continue;
+                if (npcGetter.Configuration.Flags.HasFlag(NpcConfiguration.Flag.IsCharGenFacePreset) || npcGetter.Keywords.EmptyIfNull().Contains(Skyrim.Keyword.PlayerKeyword)) continue;
 
                 bool willSkip = false;
                 foreach (var exclusionKey in excludedNPCs.Keys)
@@ -281,6 +435,7 @@ namespace TrueUnleveledSkyrim.Patch
                 wasChanged |= SetStaticLevel(npcCopy, Patcher.LinkCache);
                 wasChanged |= ChangeEquipment(npcCopy, state, Patcher.LinkCache);
                 wasChanged |= RelevelNPCSkills(npcCopy, Patcher.LinkCache);
+                wasChanged |= DistributeNPCPerks(npcCopy, Patcher.LinkCache);
 
                 ++processedRecords;
                 if (processedRecords % 100 == 0)

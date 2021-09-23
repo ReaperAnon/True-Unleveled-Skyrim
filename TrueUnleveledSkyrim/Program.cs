@@ -29,7 +29,7 @@ namespace TrueUnleveledSkyrim
 
         public static void RunPatch(IPatcherState<ISkyrimMod, ISkyrimModGetter> state)
         {
-            LinkCache = state.LoadOrder.PriorityOrder.ToImmutableLinkCache();
+            LinkCache = state.LoadOrder.ListedOrder.ToImmutableLinkCache();
 
             if (ModSettings.Value.Unleveling.UnlevelGame)
             {

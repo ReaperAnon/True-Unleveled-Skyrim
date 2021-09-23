@@ -66,7 +66,7 @@ namespace TrueUnleveledSkyrim.Patch
         // Removes every item from a list other than the highest level one.
         private static bool CullArtifactList(LeveledItem itemList)
         {
-            if (itemList.Entries is null || !Patcher.ModSettings.Value.Unleveling.Options.UnlevelArtifacts)
+            if (itemList.Entries is null || !Patcher.ModSettings.Value.Unleveling.Options.Items.UnlevelArtifacts)
                 return false;
 
             bool wasChanged = false;
@@ -89,8 +89,8 @@ namespace TrueUnleveledSkyrim.Patch
             if (itemData is null)
                 return false;
 
-            int maxLevel = Patcher.ModSettings.Value.Unleveling.Options.MaxItemLevel;
-            int minLevel = Patcher.ModSettings.Value.Unleveling.Options.MinItemLevel;
+            int maxLevel = Patcher.ModSettings.Value.Unleveling.Options.Items.MaxItemLevel;
+            int minLevel = Patcher.ModSettings.Value.Unleveling.Options.Items.MinItemLevel;
             bool shouldRemove = itemData.Level > maxLevel && maxLevel != 0 || itemData.Level < minLevel;
 
             if(itemData.Level == maxLevel && !shouldRemove)
@@ -207,7 +207,7 @@ namespace TrueUnleveledSkyrim.Patch
 
                     wasChanged |= RemoveRareItems(listCopy, Patcher.LinkCache);
                     GetLevelBoundaries(listCopy, out lvlMin, out lvlMax);
-                    if (lvlMin != Int16.MaxValue && lvlMax != -1)
+                    if (lvlMin != Int16.MaxValue && lvlMax != -1 && lvlMin != lvlMax)
                     {
                         LeveledItem weakCopy = state.PatchMod.LeveledItems.AddNew();
                         LeveledItem strongCopy = state.PatchMod.LeveledItems.AddNew();
@@ -216,12 +216,9 @@ namespace TrueUnleveledSkyrim.Patch
                         weakCopy.EditorID += TUSConstants.WeakPostfix;
                         strongCopy.EditorID += TUSConstants.StrongPostfix;
 
-                        if (lvlMin != lvlMax)
-                        {
-                            int lvlMed = (int)Math.Round((lvlMin + lvlMax) * 0.4);
-                            RemoveItemsWithRange(weakCopy, lvlMed + 1, lvlMax);
-                            RemoveItemsWithRange(strongCopy, lvlMin, lvlMed - 1);
-                        }
+                        int lvlMed = (int)Math.Round((lvlMin + lvlMax) * 0.465);
+                        RemoveItemsWithRange(weakCopy, lvlMed + 1, lvlMax);
+                        RemoveItemsWithRange(strongCopy, lvlMin, lvlMed - 1);
 
                         UnlevelList(weakCopy);
                         UnlevelList(strongCopy);

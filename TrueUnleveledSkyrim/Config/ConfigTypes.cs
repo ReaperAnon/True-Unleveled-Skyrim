@@ -31,6 +31,13 @@ namespace TrueUnleveledSkyrim.Config
         [JsonProperty] public List<string> ForbiddenKeys { get; set; } = new();
     }
 
+    // excludedPerks.json
+    public class ExcludedPerks : ConfigType
+    {
+        [JsonProperty] public List<string> Keys { get; set; } = new();
+        [JsonProperty] public List<string> ForbiddenKeys { get; set; } = new();
+    }
+
     // NPCsByEDID.json
     public class NPCEDIDEntry
     {

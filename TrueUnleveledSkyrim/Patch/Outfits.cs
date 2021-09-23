@@ -19,19 +19,25 @@ namespace TrueUnleveledSkyrim.Patch
     class OutfitsPatcher
     {
         // Replaces leveled item list entries in weak and strong outfit variants with the respective weak and strong variants of the list.
-        private static void ReplaceLVLIEntries(Outfit outfit, IPatcherState<ISkyrimMod, ISkyrimModGetter> state, ILinkCache linkCache, bool isWeak)
+        private static bool ReplaceLVLIEntries(Outfit outfit, IPatcherState<ISkyrimMod, ISkyrimModGetter> state, ILinkCache linkCache, bool isWeak)
         {
+            bool wasChanged = false;
             for(int i = 0; i<outfit.Items!.Count; ++i)
             {
                 ILeveledItemGetter? resolvedItem = outfit.Items[i].TryResolve<ILeveledItemGetter>(linkCache);
-                if(resolvedItem is not null)
+                if (resolvedItem is not null)
                 {
                     string usedPostfix = isWeak ? TUSConstants.WeakPostfix : TUSConstants.StrongPostfix;
                     LeveledItem? newItem = state.PatchMod.LeveledItems.Where(x => x.EditorID == resolvedItem.EditorID + usedPostfix).FirstOrDefault();
                     if (newItem is not null)
+                    {
+                        wasChanged = true;
                         outfit.Items[i] = newItem.AsLink();
+                    }
                 }
             }
+
+            return wasChanged;
         }
 
         // Main function to unlevel outfits.
@@ -42,15 +48,17 @@ namespace TrueUnleveledSkyrim.Patch
             {
                 if (outfitGetter.Items is null) continue;
 
-                Outfit weakCopy = state.PatchMod.Outfits.AddNew();
-                Outfit strongCopy = state.PatchMod.Outfits.AddNew();
+                Outfit weakCopy = new Outfit(state.PatchMod); // state.PatchMod.Outfits.AddNew();
+                Outfit strongCopy = new Outfit(state.PatchMod); // state.PatchMod.Outfits.AddNew();
                 weakCopy.DeepCopyIn(outfitGetter);
                 strongCopy.DeepCopyIn(outfitGetter);
                 weakCopy.EditorID += TUSConstants.WeakPostfix;
                 strongCopy.EditorID += TUSConstants.StrongPostfix;
 
-                ReplaceLVLIEntries(weakCopy, state, Patcher.LinkCache, true);
-                ReplaceLVLIEntries(strongCopy, state, Patcher.LinkCache, false);
+                if (ReplaceLVLIEntries(weakCopy, state, Patcher.LinkCache, true))
+                    state.PatchMod.Outfits.Set(weakCopy);
+                if (ReplaceLVLIEntries(strongCopy, state, Patcher.LinkCache, false))
+                    state.PatchMod.Outfits.Set(strongCopy);
 
                 ++processedRecords;
                 if (processedRecords % 100 == 0)
