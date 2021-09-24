@@ -8,6 +8,9 @@ using Mutagen.Bethesda.Skyrim;
 using TrueUnleveledSkyrim.Config;
 using TrueUnleveledSkyrim.Patch;
 using Mutagen.Bethesda.Plugins.Cache;
+using System.IO;
+
+using TrueUnleveledSkyrim.Config;
 
 namespace TrueUnleveledSkyrim
 {
@@ -31,6 +34,7 @@ namespace TrueUnleveledSkyrim
         {
             LinkCache = state.LoadOrder.ListedOrder.ToImmutableLinkCache();
 
+            TUSConstants.GetPaths(state);
             if (ModSettings.Value.Unleveling.UnlevelGame)
             {
                 LeveledItemsPatcher.PatchLVLI(state);

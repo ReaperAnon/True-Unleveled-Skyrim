@@ -2,6 +2,7 @@ using System.Collections.Generic;
 
 using Newtonsoft.Json;
 
+
 namespace TrueUnleveledSkyrim.Config
 {
     public abstract class ConfigType {}

@@ -1,18 +1,14 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Synthesis;
 using Mutagen.Bethesda.Skyrim;
-using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
-using Mutagen.Bethesda.Plugins.Aspects;
 using Mutagen.Bethesda.Plugins.Records;
-using Noggog;
 
 using TrueUnleveledSkyrim.Config;
+
 
 namespace TrueUnleveledSkyrim.Patch
 {

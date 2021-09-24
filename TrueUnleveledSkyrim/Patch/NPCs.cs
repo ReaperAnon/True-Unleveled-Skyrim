@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Collections.Generic;
 
 using Noggog;
 using Mutagen.Bethesda;
@@ -11,12 +12,13 @@ using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.FormKeys.SkyrimSE;
 
 using TrueUnleveledSkyrim.Config;
-using System.Collections.Generic;
+
 
 namespace TrueUnleveledSkyrim.Patch
 {
     class NPCsPatcher
     {
+        private static FollowerList? followerList;
         private static ExcludedPerks? excludedPerks;
         private static ExcludedNPCs? excludedNPCs;
         private static NPCEDIDs? customNPCsByID;
@@ -199,7 +201,7 @@ namespace TrueUnleveledSkyrim.Patch
         {
             float weightSum = 0;
             bool firstPass = true;
-            byte maxSkill = Patcher.ModSettings.Value.Unleveling.Options.NPCs.NPCMaxSkillLevel;
+            byte maxSkill = Patcher.ModSettings.Value.Unleveling.NPCs.NPCMaxSkillLevel;
             List<KeyValuePair<Skill, byte>> tempWeights = skillWeights.ToList();
             
             do
@@ -227,7 +229,7 @@ namespace TrueUnleveledSkyrim.Patch
 
         private static bool RelevelNPCSkills(Npc npc, ILinkCache linkCache)
         {
-            float skillsPerLevel = Patcher.ModSettings.Value.Unleveling.Options.NPCs.NPCSkillsPerLevel;
+            float skillsPerLevel = Patcher.ModSettings.Value.Unleveling.NPCs.NPCSkillsPerLevel;
             if (skillsPerLevel > 0 && npc.PlayerSkills is not null && npc.Configuration.Level is NpcLevel npcLevel)
             {
                 IClassGetter? npcClass = npc.Class.TryResolve(linkCache);
@@ -281,6 +283,18 @@ namespace TrueUnleveledSkyrim.Patch
             }
         }
 
+        private static void RemoveOldPerks(Npc npc)
+        {
+            if (npc.Perks!.Count == 0) return;
+
+            for(int i=npc.Perks.Count - 1; i>=0; --i)
+            {
+                ModKey perkModKey = npc.Perks[i].Perk.FormKey.ModKey;
+                if (perkModKey == Skyrim.ModKey || perkModKey == Dawnguard.ModKey || perkModKey == Dragonborn.ModKey)
+                    npc.Perks.RemoveAt(i);
+            }
+        }
+
         private static bool FulfillsPerkConditions(Npc npc, IPerkGetter perkEntry, Skill currSkill, ILinkCache linkCache)
         {
             // Check if NPC already has the perk or not.
@@ -293,7 +307,7 @@ namespace TrueUnleveledSkyrim.Patch
                 if (perkCondition.DeepCopy() is ConditionFloat perkCondFloat && perkCondFloat.Data is FunctionConditionData funcCond)
                 {
                     if (funcCond.Function == Condition.Function.GetBaseActorValue && funcCond.ParameterOneNumber == (int)currSkill)
-                        fulfillsConditions = fulfillsConditions && PerformCompare(perkCondFloat, npc.PlayerSkills!.SkillValues[currSkill], perkCondFloat.ComparisonValue); //npc.PlayerSkills!.SkillValues[currSkill] >= perkCondFloat.ComparisonValue;
+                        fulfillsConditions = fulfillsConditions && PerformCompare(perkCondFloat, npc.PlayerSkills!.SkillValues[currSkill], perkCondFloat.ComparisonValue);
                     else if (funcCond.Function == Condition.Function.HasPerk && funcCond.ParameterOneRecord.TryResolve<IPerkGetter>(linkCache, out var requiredPerk))
                     {
                         if(perkCondFloat.CompareOperator == CompareOperator.EqualTo && perkCondFloat.ComparisonValue == 1 || perkCondFloat.CompareOperator == CompareOperator.NotEqualTo && perkCondFloat.ComparisonValue == 0)
@@ -310,8 +324,8 @@ namespace TrueUnleveledSkyrim.Patch
 
         private static bool DistributeNPCPerks(Npc npc, ILinkCache linkCache)
         {
-            bool removeOldPerks = Patcher.ModSettings.Value.Unleveling.Options.NPCs.RemoveOldPerks;
-            float perksPerLevel = Patcher.ModSettings.Value.Unleveling.Options.NPCs.NPCPerksPerLevel;
+            bool removeOldPerks = Patcher.ModSettings.Value.Unleveling.NPCs.RemoveOldPerks;
+            float perksPerLevel = Patcher.ModSettings.Value.Unleveling.NPCs.NPCPerksPerLevel;
             if(perksPerLevel > 0)
             {
                 if (npc.PlayerSkills is null) return false;
@@ -322,9 +336,10 @@ namespace TrueUnleveledSkyrim.Patch
                 if (npc.Configuration.Level is NpcLevel npcLevel)
                     perksPerLevel *= npcLevel.Level;
 
-                if (removeOldPerks || npc.Perks is null)
-                    npc.Perks = new();
-                
+                if (npc.Perks is null) npc.Perks = new();
+                if (removeOldPerks)
+                    RemoveOldPerks(npc);
+
                 List<KeyValuePair<Skill, byte>> perkDistribution = npcClass.SkillWeights.ToList();
                 float weightSum = perkDistribution.Sum(x => x.Value);
                 int perkOverflow = 0;
@@ -386,15 +401,74 @@ namespace TrueUnleveledSkyrim.Patch
                     }
                 }
 
+                if (npc.Perks.Count == 0)
+                    npc.Perks = null;
+
                 return true;
             }
 
             return false;
         }
 
+        private static void DisableExtraDamagePerks(IPatcherState<ISkyrimMod, ISkyrimModGetter> state)
+        {
+            if (!Patcher.ModSettings.Value.Unleveling.NPCs.DisableExtraDamagePerks) return;
+
+            foreach (IPerkGetter? perkGetter in state.LoadOrder.PriorityOrder.Perk().WinningOverrides().Where(x => x.EditorID is not null && x.EditorID.Contains("crExtraDamage", StringComparison.OrdinalIgnoreCase)))
+            {
+                Perk perkCopy = perkGetter.DeepCopy();
+                perkCopy.Effects.Clear();
+                state.PatchMod.Perks.Set(perkCopy);
+            }
+        }
+
+        private static bool IsFollower(Npc npc)
+        {
+            if (!Patcher.ModSettings.Value.Unleveling.NPCs.ScalingFollowers || npc.EditorID is null) return false;
+
+            bool isFollower = false;
+            foreach (RankPlacement rankPlacement in npc.Factions)
+            {
+                if (rankPlacement.Faction.Equals(Skyrim.Faction.PotentialFollowerFaction) || rankPlacement.Faction.Equals(Skyrim.Faction.PotentialHireling))
+                {
+                    isFollower = true;
+                    break;
+                }
+            }
+
+            foreach (FollowerEntry? followerEntry in followerList!.Followers)
+            {
+                if (npc.EditorID.Contains(followerEntry.Key, StringComparison.OrdinalIgnoreCase))
+                    isFollower = true;
+                foreach (string? forbiddenKey in followerEntry.ForbiddenKeys)
+                if (npc.EditorID.Contains(forbiddenKey))
+                {
+                    isFollower = false;
+                    break;
+                }
+
+                break;
+            }
+
+            return isFollower;
+        }
+
+        private static bool SetFollowerScaling(Npc npc)
+        {
+            if (!IsFollower(npc)) return false;
+
+            short currLevel = (npc.Configuration.Level as NpcLevel)?.Level ?? 40;
+            npc.Configuration.Level = new PcLevelMult { LevelMult = 1 };
+            npc.Configuration.CalcMinLevel = Math.Max(npc.Configuration.CalcMinLevel, (short)1);
+            npc.Configuration.CalcMaxLevel = Math.Max(npc.Configuration.CalcMaxLevel, currLevel);
+
+            return true;
+        }
+
         // Main function to unlevel all NPCs.
         public static void PatchNPCs(IPatcherState<ISkyrimMod, ISkyrimModGetter> state)
         {
+            followerList = JsonHelper.LoadConfig<FollowerList>(TUSConstants.FollowersPath);
             excludedPerks = JsonHelper.LoadConfig<ExcludedPerks>(TUSConstants.ExcludedPerksPath);
             excludedNPCs = JsonHelper.LoadConfig<ExcludedNPCs>(TUSConstants.ExcludedNPCsPath);
             customNPCsByID = JsonHelper.LoadConfig<NPCEDIDs>(TUSConstants.NPCEDIDPath);
@@ -434,6 +508,7 @@ namespace TrueUnleveledSkyrim.Patch
                 wasChanged |= ChangeEquipment(npcCopy, state, Patcher.LinkCache);
                 wasChanged |= RelevelNPCSkills(npcCopy, Patcher.LinkCache);
                 wasChanged |= DistributeNPCPerks(npcCopy, Patcher.LinkCache);
+                wasChanged |= SetFollowerScaling(npcCopy);
 
                 ++processedRecords;
                 if (processedRecords % 100 == 0)
@@ -444,6 +519,8 @@ namespace TrueUnleveledSkyrim.Patch
                     state.PatchMod.Npcs.Set(npcCopy);
                 }
             }
+
+            DisableExtraDamagePerks(state);
 
             Console.WriteLine("Processed " + processedRecords + " npcs in total.");
         }

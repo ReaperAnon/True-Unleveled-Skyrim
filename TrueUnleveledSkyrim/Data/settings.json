@@ -11,7 +11,9 @@
         "VeryHardSpawnLevelMult": 1.5
       },
       "NPCs": {
-        "RemoveOldPerks": false,
+        "RemoveOldPerks": true,
+        "DisableExtraDamagePerks": true,
+        "ScalingFollowers": true,
         "NPCPerksPerLevel": 1.0,
         "NPCSkillsPerLevel": 9.5,
         "NPCMaxSkillLevel": 100

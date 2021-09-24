@@ -1,9 +1,5 @@
 using Mutagen.Bethesda.WPF.Reflection.Attributes;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace TrueUnleveledSkyrim.Config
 {
@@ -21,7 +17,10 @@ namespace TrueUnleveledSkyrim.Config
         public bool UnlevelGame { get; set; } = true;
 
 
-        public TUSConfig_Unleveling Options { get; set; } = new TUSConfig_Unleveling();
+        public TUSConfig_Zones Zones { get; set; } = new();
+        [SettingName("NPCs")]
+        public TUSConfig_NPCs NPCs { get; set; } = new();
+        public TUSConfig_Items Items { get; set; } = new();
     }
 
     public class TUSConfig_ItemAdjustments
@@ -31,14 +30,6 @@ namespace TrueUnleveledSkyrim.Config
 
 
         public TUSConfig_Morrowloot Options { get; set; } = new TUSConfig_Morrowloot();
-    }
-
-    public class TUSConfig_Unleveling
-    {
-        public TUSConfig_Zones Zones { get; set; } = new();
-        [SettingName("NPCs")]
-        public TUSConfig_NPCs NPCs { get; set; } = new();
-        public TUSConfig_Items Items { get; set; } = new();
     }
 
     public class TUSConfig_Items
@@ -83,9 +74,16 @@ namespace TrueUnleveledSkyrim.Config
 
     public class TUSConfig_NPCs
     {
-        [Tooltip("If enabled, NPCs will have all their previously assigned perks removed before getting new ones added.")]
+        [Tooltip("If enabled, NPCs will have their previously assigned perks removed before getting new ones added. Only removes perks originating from vanilla data files, so mod-added abilities can function.")]
         public bool RemoveOldPerks { get; set; } = true;
 
+
+        [Tooltip("If enabled, makes the Extra Damage perks NPCs get that just multiply their damage by several magnitudes do nothing instead. Optimal if you want to distribute perks and/or use a skill-based damage mod.")]
+        public bool DisableExtraDamagePerks { get; set; } = true;
+
+
+        [Tooltip("If enabled, followers will scale 1:1 with the player with their maximum level cap being what their static level would be. They will still get skills and perks distributed as if they had their static levels, if enabled.")]
+        public bool ScalingFollowers { get; set; } = true;
 
         [Tooltip("The amount of perk points NPCs get per every level they have. Set to 0 to not grant them any perks. The perks are distributed according to their requirements.")]
         public float NPCPerksPerLevel { get; set; } = 1f;

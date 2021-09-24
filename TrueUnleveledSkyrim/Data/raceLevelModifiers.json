@@ -5,8 +5,8 @@
         "Dragon"
       ],
       "ForbiddenKeys": [],
-      "LevelModifierAdd": 0,
-      "LevelModifierMult": 2
+      "LevelModifierAdd": 50,
+      "LevelModifierMult": 0.2
     },
     {
       "Keys": [

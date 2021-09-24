@@ -7,7 +7,7 @@
                 "GuardDialogueFaction",
                 "CWSonsFactionNPC"
             ],
-            "MinLevel": 15,
+            "MinLevel": 25,
             "MaxLevel": 35
         },
         {

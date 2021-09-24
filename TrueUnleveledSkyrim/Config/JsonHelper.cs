@@ -2,6 +2,7 @@ using System.IO;
 
 using Newtonsoft.Json;
 
+
 namespace TrueUnleveledSkyrim.Config
 {
     public static class JsonHelper
