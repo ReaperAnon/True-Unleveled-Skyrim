@@ -207,7 +207,7 @@ namespace TrueUnleveledSkyrim.Patch
             do
             {
                 int pointOverflow = 0;
-                weightSum = tempWeights.EmptyIfNull().Sum(x => x.Value);
+                weightSum = tempWeights.Any() ? tempWeights.Sum(x => x.Value) : 0;
                 for (int i=tempWeights.Count - 1; i>=0; --i)
                 {
                     if (firstPass)
@@ -341,7 +341,7 @@ namespace TrueUnleveledSkyrim.Patch
                     RemoveOldPerks(npc);
 
                 List<KeyValuePair<Skill, byte>> perkDistribution = npcClass.SkillWeights.ToList();
-                float weightSum = perkDistribution.EmptyIfNull().Sum(x => x.Value);
+                float weightSum = perkDistribution.Any() ? perkDistribution.Sum(x => x.Value) : 0;
                 int perkOverflow = 0;
                 foreach(KeyValuePair<Skill, byte> perkWeight in perkDistribution)
                 {

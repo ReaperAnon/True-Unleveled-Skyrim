@@ -70,7 +70,8 @@ namespace TrueUnleveledSkyrim.Patch
                 return false;
 
             bool wasChanged = false;
-            int levelMax = itemList.Entries.EmptyIfNull().Select(x => x.Data!.Level).Max();
+            var arrayData = itemList.Entries.Select(x => x.Data!.Level);
+            int levelMax = arrayData.Any() ? arrayData.Max() : 0;
             for(int i=itemList.Entries.Count - 1; i>=0; --i)
             {
                 if (itemList.Entries[i].Data!.Level != levelMax)
