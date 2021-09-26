@@ -4,13 +4,11 @@ using System.Threading.Tasks;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Synthesis;
 using Mutagen.Bethesda.Skyrim;
+using Mutagen.Bethesda.Plugins.Cache;
 
 using TrueUnleveledSkyrim.Config;
 using TrueUnleveledSkyrim.Patch;
-using Mutagen.Bethesda.Plugins.Cache;
-using System.IO;
 
-using TrueUnleveledSkyrim.Config;
 
 namespace TrueUnleveledSkyrim
 {

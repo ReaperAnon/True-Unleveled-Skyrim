@@ -6,22 +6,25 @@ using Mutagen.Bethesda.Skyrim;
 using Mutagen.Bethesda.FormKeys.SkyrimSE;
 using Mutagen.Bethesda.Synthesis;
 using Mutagen.Bethesda.Plugins.Records;
-
+using Mutagen.Bethesda.Plugins.Cache;
+using Mutagen.Bethesda.Plugins.Order;
 
 namespace TrueUnleveledSkyrim.Patch
 {
     class ItemsPatcher
     {
-        // A struct to hold the original and morrowloot-inspired stats of an armor.
-        private readonly struct ArmorValues
-        {
-            public readonly float ArmorValue { get; }
-            public readonly float ArmorWeight { get; }
-            public readonly double ArmorPrice { get; }
+        private static ILinkCache baseCache { get; set; } = null!;
 
-            public readonly float ArmorValueMod { get; }
-            public readonly float ArmorWeightMod { get; }
-            public readonly double ArmorPriceMod { get; }
+        // A struct to hold the original and morrowloot-inspired stats of an armor.
+        private class ArmorValues
+        {
+            public float ArmorValue { get; set; }
+            public float ArmorWeight { get; set; }
+            public double ArmorPrice { get; set; }
+
+            public float ArmorValueMod { get; set; }
+            public float ArmorWeightMod { get; set; }
+            public double ArmorPriceMod { get; set; }
 
             public ArmorValues(float armorValue, float armorWeight, uint armorPrice, float armorValueMod, float armorWeightMod, uint armorPriceMod)
             {
@@ -31,21 +34,21 @@ namespace TrueUnleveledSkyrim.Patch
         };
 
         // A struct to hold the original and morrowloot-inspired stats of a weapon.
-        private readonly struct WeaponValues
+        private class WeaponValues
         {
-            public float WeaponDamage { get; }
-            public float WeaponWeight { get; }
-            public double WeaponPrice { get; }
-            public float WeaponSpeed { get; }
-            public float WeaponCritDamage { get; }
-            public float WeaponCritMult { get; }
+            public float WeaponDamage { get; set; }
+            public float WeaponWeight { get; set; }
+            public double WeaponPrice { get; set; }
+            public float WeaponSpeed { get; set; }
+            public float WeaponCritDamage { get; set; }
+            public float WeaponCritMult { get; set; }
 
-            public float WeaponDamageMod { get; }
-            public float WeaponWeightMod { get; }
-            public double WeaponPriceMod { get; }
-            public float WeaponSpeedMod { get; }
-            public float WeaponCritDamageMod { get; }
-            public float WeaponCritMultMod { get; }
+            public float WeaponDamageMod { get; set; }
+            public float WeaponWeightMod { get; set; }
+            public double WeaponPriceMod { get; set; }
+            public float WeaponSpeedMod { get; set; }
+            public float WeaponCritDamageMod { get; set; }
+            public float WeaponCritMultMod { get; set; }
 
             public WeaponValues(float weaponDamage, float weaponWeight, float weaponPrice, float weaponSpeed, float weaponCritDamage, float weaponCritMult, float weaponDamageMod, float weaponWeightMod, float weaponPriceMod, float weaponSpeedMod, float weaponCritDamageMod, float weaponCritMultMod)
             {
@@ -54,8 +57,113 @@ namespace TrueUnleveledSkyrim.Patch
             }
         };
 
-        // Read-only dictionary to match weapon materials and types to their corresponding stats.
-        private static readonly IReadOnlyDictionary<IFormLinkGetter<IKeywordGetter>, Dictionary<IFormLinkGetter<IKeywordGetter>, WeaponValues>> weaponKeys = new Dictionary<IFormLinkGetter<IKeywordGetter>, Dictionary<IFormLinkGetter<IKeywordGetter>, WeaponValues>>()
+        private static List<IFormLinkGetter<IKeywordGetter>> WeaponMaterialKeywords { get; } = new List<IFormLinkGetter<IKeywordGetter>>
+        {
+            Dawnguard.Keyword.DLC1WeapMaterialDragonbone,
+            Skyrim.Keyword.WeapMaterialDaedric,
+            Skyrim.Keyword.WeapMaterialEbony,
+            Dragonborn.Keyword.DLC2WeaponMaterialStalhrim,
+            Skyrim.Keyword.WeapMaterialGlass
+        };
+
+        private static List<IFormLinkGetter<IKeywordGetter>> WeaponTypeKeywords { get; } = new List<IFormLinkGetter<IKeywordGetter>>
+        {
+            Skyrim.Keyword.WeapTypeBattleaxe,
+            Skyrim.Keyword.WeapTypeBow,
+            Skyrim.Keyword.WeapTypeDagger,
+            Skyrim.Keyword.WeapTypeGreatsword,
+            Skyrim.Keyword.WeapTypeMace,
+            Skyrim.Keyword.WeapTypeSword,
+            Skyrim.Keyword.WeapTypeWarAxe,
+            Skyrim.Keyword.WeapTypeWarhammer
+        };
+
+        private static List<IFormLinkGetter<IWeaponGetter>> BaseWeapons { get; } = new List<IFormLinkGetter<IWeaponGetter>>
+        {
+            Skyrim.Weapon.GlassBattleaxe,
+            Skyrim.Weapon.GlassBow,
+            Skyrim.Weapon.GlassDagger,
+            Skyrim.Weapon.GlassGreatsword,
+            Skyrim.Weapon.GlassMace,
+            Skyrim.Weapon.GlassSword,
+            Skyrim.Weapon.GlassWarAxe,
+            Skyrim.Weapon.GlassWarhammer,
+            Skyrim.Weapon.EbonyBattleaxe,
+            Skyrim.Weapon.EbonyBow,
+            Skyrim.Weapon.EbonyDagger,
+            Skyrim.Weapon.EbonyGreatsword,
+            Skyrim.Weapon.EbonyMace,
+            Skyrim.Weapon.EbonySword,
+            Skyrim.Weapon.EbonyWarAxe,
+            Skyrim.Weapon.EbonyWarhammer,
+            Skyrim.Weapon.DaedricBattleaxe,
+            Skyrim.Weapon.DaedricBow,
+            Skyrim.Weapon.DaedricDagger,
+            Skyrim.Weapon.DaedricGreatsword,
+            Skyrim.Weapon.DaedricMace,
+            Skyrim.Weapon.DaedricSword,
+            Skyrim.Weapon.DaedricWarAxe,
+            Skyrim.Weapon.DaedricWarhammer,
+            Dawnguard.Weapon.DLC1DragonboneBattleaxe,
+            Dawnguard.Weapon.DLC1DragonboneBow,
+            Dawnguard.Weapon.DLC1DragonboneDagger,
+            Dawnguard.Weapon.DLC1DragonboneGreatsword,
+            Dawnguard.Weapon.DLC1DragonboneMace,
+            Dawnguard.Weapon.DLC1DragonboneSword,
+            Dawnguard.Weapon.DLC1DragonboneWarAxe,
+            Dawnguard.Weapon.DLC1DragonboneWarhammer,
+            Dragonborn.Weapon.DLC2StalhrimBattleaxe,
+            Dragonborn.Weapon.DLC2StalhrimBow,
+            Dragonborn.Weapon.DLC2StalhrimDagger,
+            Dragonborn.Weapon.DLC2StalhrimGreatsword,
+            Dragonborn.Weapon.DLC2StalhrimMace,
+            Dragonborn.Weapon.DLC2StalhrimSword,
+            Dragonborn.Weapon.DLC2StalhrimWarAxe,
+            Dragonborn.Weapon.DLC2StalhrimWarhammer
+        };
+
+        private static void LoadBaseCache(IPatcherState<ISkyrimMod, ISkyrimModGetter> state)
+        {
+            baseCache = LoadOrder.Import<ISkyrimModGetter>(state.DataFolderPath, Patcher.ModSettings.Value.ItemAdjustments.Options.BaseStatPlugins, Mutagen.Bethesda.GameRelease.SkyrimSE).ListedOrder.ToImmutableLinkCache();
+        }
+
+        private static bool GetWeaponKeyword(IWeaponGetter resolvedItem, List<IFormLinkGetter<IKeywordGetter>> keyList, out IFormLinkGetter<IKeywordGetter>? availableKey)
+        {
+            availableKey = null;
+            if (resolvedItem.Keywords is null) return false;
+            foreach(var keyEntry in resolvedItem.Keywords)
+            {
+                foreach(var keyMatch in keyList)
+                if(keyMatch.Equals(keyEntry))
+                {
+                    availableKey = keyEntry;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static void ReadWeaponValues()
+        {
+            foreach(IFormLink<IWeaponGetter> weaponLink in BaseWeapons)
+            {
+                var resolvedWeapon = weaponLink.TryResolve(baseCache);
+                if (resolvedWeapon is null) continue;
+                if (!GetWeaponKeyword(resolvedWeapon, WeaponMaterialKeywords, out var weaponMaterial)) continue;
+                if (!GetWeaponKeyword(resolvedWeapon, WeaponTypeKeywords, out var weaponType)) continue;
+
+                weaponKeys[weaponMaterial!][weaponType!].WeaponDamage = resolvedWeapon.BasicStats?.Damage ?? weaponKeys[weaponMaterial!][weaponType!].WeaponDamage;
+                weaponKeys[weaponMaterial!][weaponType!].WeaponWeight = resolvedWeapon.BasicStats?.Weight ?? weaponKeys[weaponMaterial!][weaponType!].WeaponWeight;
+                weaponKeys[weaponMaterial!][weaponType!].WeaponPrice = resolvedWeapon.BasicStats?.Value ?? weaponKeys[weaponMaterial!][weaponType!].WeaponPrice;
+                weaponKeys[weaponMaterial!][weaponType!].WeaponSpeed = resolvedWeapon.Data?.Speed ?? weaponKeys[weaponMaterial!][weaponType!].WeaponSpeed;
+                weaponKeys[weaponMaterial!][weaponType!].WeaponCritDamage = resolvedWeapon.Critical?.Damage ?? weaponKeys[weaponMaterial!][weaponType!].WeaponCritDamage;
+                weaponKeys[weaponMaterial!][weaponType!].WeaponCritMult = resolvedWeapon.Critical?.PercentMult ?? weaponKeys[weaponMaterial!][weaponType!].WeaponCritMult;
+            }
+        }
+
+        // Dictionary to match weapon materials and types to their corresponding stats.
+        private static Dictionary<IFormLinkGetter<IKeywordGetter>, Dictionary<IFormLinkGetter<IKeywordGetter>, WeaponValues>> weaponKeys = new Dictionary<IFormLinkGetter<IKeywordGetter>, Dictionary<IFormLinkGetter<IKeywordGetter>, WeaponValues>>()
         {
             {
                 Skyrim.Keyword.WeapMaterialDaedric, new Dictionary<IFormLinkGetter<IKeywordGetter>, WeaponValues>()
@@ -164,8 +272,166 @@ namespace TrueUnleveledSkyrim.Patch
             }
         };
 
+        private static List<IFormLinkGetter<IKeywordGetter>> ArmorMaterialKeywords { get; } = new List<IFormLinkGetter<IKeywordGetter>>
+        {
+            Skyrim.Keyword.ArmorMaterialDaedric,
+            Skyrim.Keyword.ArmorMaterialDragonplate,
+            Skyrim.Keyword.ArmorMaterialDragonscale,
+            Skyrim.Keyword.ArmorMaterialEbony,
+            Skyrim.Keyword.ArmorMaterialGlass,
+            Skyrim.Keyword.ArmorNightingale,
+            Dragonborn.Keyword.DLC2ArmorMaterialStalhrimHeavy,
+            Dragonborn.Keyword.DLC2ArmorMaterialStalhrimLight
+        };
+
+        private static List<IFormLinkGetter<IKeywordGetter>> ArmorTypeKeywords { get; } = new List<IFormLinkGetter<IKeywordGetter>>
+        {
+            Skyrim.Keyword.ArmorBoots,
+            Skyrim.Keyword.ArmorCuirass,
+            Skyrim.Keyword.ArmorGauntlets,
+            Skyrim.Keyword.ArmorHelmet,
+            Skyrim.Keyword.ArmorShield
+        };
+
+        private static List<IFormLinkGetter<IArmorGetter>> BaseArmors { get; } = new List<IFormLinkGetter<IArmorGetter>>
+        {
+            Skyrim.Armor.ArmorDaedricBoots,
+            Skyrim.Armor.ArmorDaedricCuirass,
+            Skyrim.Armor.ArmorDaedricGauntlets,
+            Skyrim.Armor.ArmorDaedricHelmet,
+            Skyrim.Armor.ArmorDaedricShield,
+            Skyrim.Armor.ArmorDragonplateBoots,
+            Skyrim.Armor.ArmorDragonplateCuirass,
+            Skyrim.Armor.ArmorDragonplateGauntlets,
+            Skyrim.Armor.ArmorDragonplateHelmet,
+            Skyrim.Armor.ArmorDragonplateShield,
+            Skyrim.Armor.ArmorDragonscaleBoots,
+            Skyrim.Armor.ArmorDragonscaleCuirass,
+            Skyrim.Armor.ArmorDragonscaleGauntlets,
+            Skyrim.Armor.ArmorDragonscaleHelmet,
+            Skyrim.Armor.ArmorDragonscaleShield,
+            Skyrim.Armor.ArmorEbonyBoots,
+            Skyrim.Armor.ArmorEbonyCuirass,
+            Skyrim.Armor.ArmorEbonyGauntlets,
+            Skyrim.Armor.ArmorEbonyHelmet,
+            Skyrim.Armor.ArmorEbonyShield,
+            Skyrim.Armor.ArmorGlassBoots,
+            Skyrim.Armor.ArmorGlassCuirass,
+            Skyrim.Armor.ArmorGlassGauntlets,
+            Skyrim.Armor.ArmorGlassHelmet,
+            Skyrim.Armor.ArmorGlassShield,
+            Skyrim.Armor.ArmorNightingaleBootsPlayer03,
+            Skyrim.Armor.ArmorNightingaleCuirassPlayer03,
+            Skyrim.Armor.ArmorNightingaleGauntletsPlayer03,
+            Skyrim.Armor.ArmorNightingaleHelmetPlayer03,
+            Dragonborn.Armor.DLC2ArmorStalhrimHeavyBoots,
+            Dragonborn.Armor.DLC2ArmorStalhrimHeavyCuirass,
+            Dragonborn.Armor.DLC2ArmorStalhrimHeavyGauntlets,
+            Dragonborn.Armor.DLC2ArmorStalhrimHeavyHelmet,
+            Dragonborn.Armor.DLC2ArmorStalhrimLightBoots,
+            Dragonborn.Armor.DLC2ArmorStalhrimLightCuirass,
+            Dragonborn.Armor.DLC2ArmorStalhrimLightGauntlets,
+            Dragonborn.Armor.DLC2ArmorStalhrimLightHelmet,
+            Dragonborn.Armor.DLC2ArmorStalhrimShield
+        };
+
+        private static bool GetArmorKeyword(IArmorGetter resolvedItem, List<IFormLinkGetter<IKeywordGetter>> keyList, out IFormLinkGetter<IKeywordGetter>? availableKey)
+        {
+            availableKey = null;
+            if (resolvedItem.Keywords is null) return false;
+            foreach (var keyEntry in resolvedItem.Keywords)
+            {
+                foreach (var keyMatch in keyList)
+                    if (keyMatch.Equals(keyEntry))
+                    {
+                        availableKey = keyEntry;
+                        return true;
+                    }
+            }
+
+            return false;
+        }
+
+        private static void SetArmorValue(IFormLinkGetter<IKeywordGetter> armorMaterial, IFormLinkGetter<IKeywordGetter> armorClass, IFormLinkGetter<IKeywordGetter> armorType, float armorRating, float armorWeight, double armorValue)
+        {
+            armorKeys[armorMaterial][armorClass][armorType].ArmorValue = armorRating;
+            armorKeys[armorMaterial][armorClass][armorType].ArmorWeight = armorWeight;
+            armorKeys[armorMaterial][armorClass][armorType].ArmorPrice = armorValue;
+        }
+
+        private static void ReadArmorValues()
+        {
+            foreach (IFormLink<IArmorGetter> armorLink in BaseArmors)
+            {
+                var resolvedArmor = armorLink.TryResolve(baseCache);
+                if (resolvedArmor is null) continue;
+                if (!GetArmorKeyword(resolvedArmor, ArmorMaterialKeywords, out var armorMaterial)) continue;
+                if (!GetArmorKeyword(resolvedArmor, ArmorTypeKeywords, out var armorType)) continue;
+
+                bool isHeavy = (resolvedArmor.BodyTemplate?.ArmorType ?? ArmorType.Clothing) == ArmorType.HeavyArmor;
+                bool isLight = (resolvedArmor.BodyTemplate?.ArmorType ?? ArmorType.Clothing) == ArmorType.LightArmor;
+                if (!isHeavy && !isLight) continue;
+                IFormLinkGetter<IKeywordGetter> armorClass = isLight ? Skyrim.Keyword.ArmorLight : Skyrim.Keyword.ArmorHeavy;
+
+                SetArmorValue(armorMaterial!, armorClass!, armorType!, resolvedArmor.ArmorRating, resolvedArmor.Weight, resolvedArmor.Value);
+                if(armorMaterial!.Equals(Skyrim.Keyword.ArmorMaterialDragonplate))
+                {
+                    SetArmorValue(Skyrim.Keyword.ArmorMaterialDragonscale, Skyrim.Keyword.ArmorHeavy, armorType!, resolvedArmor.ArmorRating, resolvedArmor.Weight, resolvedArmor.Value);
+                }
+                else if(armorMaterial!.Equals(Dragonborn.Keyword.DLC2ArmorMaterialStalhrimHeavy))
+                {
+                    SetArmorValue(Dragonborn.Keyword.DLC2ArmorMaterialStalhrimLight, Skyrim.Keyword.ArmorHeavy, armorType!, resolvedArmor.ArmorRating, resolvedArmor.Weight, resolvedArmor.Value);
+                }
+                else if(armorMaterial!.Equals(Dragonborn.Keyword.DLC2ArmorMaterialStalhrimLight))
+                {
+                    SetArmorValue(Dragonborn.Keyword.DLC2ArmorMaterialStalhrimHeavy, Skyrim.Keyword.ArmorLight, armorType!, resolvedArmor.ArmorRating, resolvedArmor.Weight, resolvedArmor.Value);
+                }
+                else if(armorMaterial!.Equals(Skyrim.Keyword.ArmorMaterialDragonscale))
+                {
+                    SetArmorValue(Skyrim.Keyword.ArmorMaterialDragonplate, Skyrim.Keyword.ArmorLight, armorType!, resolvedArmor.ArmorRating, resolvedArmor.Weight, resolvedArmor.Value);
+                    if(armorType!.Equals(Skyrim.Keyword.ArmorBoots))
+                        SetArmorValue(Skyrim.Keyword.ArmorMaterialDaedric, Skyrim.Keyword.ArmorLight, armorType!, resolvedArmor.ArmorRating + 1, resolvedArmor.Weight, resolvedArmor.Value + 150);
+                    else if(armorType!.Equals(Skyrim.Keyword.ArmorCuirass))
+                        SetArmorValue(Skyrim.Keyword.ArmorMaterialDaedric, Skyrim.Keyword.ArmorLight, armorType!, resolvedArmor.ArmorRating + 3, resolvedArmor.Weight - 2, resolvedArmor.Value + 300);
+                    else if(armorType!.Equals(Skyrim.Keyword.ArmorGauntlets))
+                        SetArmorValue(Skyrim.Keyword.ArmorMaterialDaedric, Skyrim.Keyword.ArmorLight, armorType!, resolvedArmor.ArmorRating + 1, resolvedArmor.Weight - 1, resolvedArmor.Value + 150);
+                    else if(armorType!.Equals(Skyrim.Keyword.ArmorHelmet))
+                        SetArmorValue(Skyrim.Keyword.ArmorMaterialDaedric, Skyrim.Keyword.ArmorLight, armorType!, resolvedArmor.ArmorRating + 1, resolvedArmor.Weight, resolvedArmor.Value + 200);
+                    else if(armorType!.Equals(Skyrim.Keyword.ArmorShield))
+                        SetArmorValue(Skyrim.Keyword.ArmorMaterialDaedric, Skyrim.Keyword.ArmorLight, armorType!, resolvedArmor.ArmorRating + 2, resolvedArmor.Weight, resolvedArmor.Value + 200);
+                }
+                else if(armorMaterial!.Equals(Skyrim.Keyword.ArmorMaterialEbony))
+                {
+                    if(armorType!.Equals(Skyrim.Keyword.ArmorBoots))
+                        SetArmorValue(Skyrim.Keyword.ArmorMaterialGlass, Skyrim.Keyword.ArmorHeavy, armorType!, resolvedArmor.ArmorRating - 1, resolvedArmor.Weight - 1, resolvedArmor.Value);
+                    else if(armorType!.Equals(Skyrim.Keyword.ArmorCuirass))
+                        SetArmorValue(Skyrim.Keyword.ArmorMaterialGlass, Skyrim.Keyword.ArmorHeavy, armorType!, resolvedArmor.ArmorRating - 2, resolvedArmor.Weight - 10, resolvedArmor.Value);
+                    else if(armorType!.Equals(Skyrim.Keyword.ArmorGauntlets))
+                        SetArmorValue(Skyrim.Keyword.ArmorMaterialGlass, Skyrim.Keyword.ArmorHeavy, armorType!, resolvedArmor.ArmorRating - 1, resolvedArmor.Weight - 2, resolvedArmor.Value);
+                    else if(armorType!.Equals(Skyrim.Keyword.ArmorHelmet))
+                        SetArmorValue(Skyrim.Keyword.ArmorMaterialGlass, Skyrim.Keyword.ArmorHeavy, armorType!, resolvedArmor.ArmorRating - 1, resolvedArmor.Weight - 1, resolvedArmor.Value);
+                    else if(armorType!.Equals(Skyrim.Keyword.ArmorShield))
+                        SetArmorValue(Skyrim.Keyword.ArmorMaterialGlass, Skyrim.Keyword.ArmorHeavy, armorType!, resolvedArmor.ArmorRating - 1, resolvedArmor.Weight - 2, resolvedArmor.Value);
+                }
+                else if(armorMaterial!.Equals(Skyrim.Keyword.ArmorMaterialGlass))
+                {
+                    if(armorType!.Equals(Skyrim.Keyword.ArmorBoots))
+                        SetArmorValue(Skyrim.Keyword.ArmorMaterialEbony, Skyrim.Keyword.ArmorLight, armorType!, resolvedArmor.ArmorRating + 1, resolvedArmor.Weight + 1, resolvedArmor.Value);
+                    else if(armorType!.Equals(Skyrim.Keyword.ArmorCuirass))
+                        SetArmorValue(Skyrim.Keyword.ArmorMaterialEbony, Skyrim.Keyword.ArmorLight, armorType!, resolvedArmor.ArmorRating + 2, resolvedArmor.Weight + 2, resolvedArmor.Value);
+                    else if(armorType!.Equals(Skyrim.Keyword.ArmorGauntlets))
+                        SetArmorValue(Skyrim.Keyword.ArmorMaterialEbony, Skyrim.Keyword.ArmorLight, armorType!, resolvedArmor.ArmorRating + 1, resolvedArmor.Weight + 1, resolvedArmor.Value);
+                    else if(armorType!.Equals(Skyrim.Keyword.ArmorHelmet))
+                        SetArmorValue(Skyrim.Keyword.ArmorMaterialEbony, Skyrim.Keyword.ArmorLight, armorType!, resolvedArmor.ArmorRating + 1, resolvedArmor.Weight + 2, resolvedArmor.Value);
+                    else if(armorType!.Equals(Skyrim.Keyword.ArmorShield))
+                        SetArmorValue(Skyrim.Keyword.ArmorMaterialEbony, Skyrim.Keyword.ArmorLight, armorType!, resolvedArmor.ArmorRating + 1, resolvedArmor.Weight, resolvedArmor.Value);
+                }
+            }
+        }
+
+
         // Read-only dictionary to match armor materials, types and pieces to thheir corresponding stats.
-        private static readonly IReadOnlyDictionary<IFormLinkGetter<IKeywordGetter>, Dictionary<IFormLinkGetter<IKeywordGetter>, Dictionary<IFormLinkGetter<IKeywordGetter>, ArmorValues>>> armorKeys = new Dictionary<IFormLinkGetter<IKeywordGetter>, Dictionary<IFormLinkGetter<IKeywordGetter>, Dictionary<IFormLinkGetter<IKeywordGetter>, ArmorValues>>>()
+        private static Dictionary<IFormLinkGetter<IKeywordGetter>, Dictionary<IFormLinkGetter<IKeywordGetter>, Dictionary<IFormLinkGetter<IKeywordGetter>, ArmorValues>>> armorKeys = new Dictionary<IFormLinkGetter<IKeywordGetter>, Dictionary<IFormLinkGetter<IKeywordGetter>, Dictionary<IFormLinkGetter<IKeywordGetter>, ArmorValues>>>()
         {
             {
                 Skyrim.Keyword.ArmorMaterialDaedric, new Dictionary<IFormLinkGetter<IKeywordGetter>, Dictionary<IFormLinkGetter<IKeywordGetter>, ArmorValues>>()
@@ -449,6 +715,10 @@ namespace TrueUnleveledSkyrim.Patch
         // Main function to change all item stats to new morrowloot-inspired values.
         public static void PatchItems(IPatcherState<ISkyrimMod, ISkyrimModGetter> state)
         {
+            LoadBaseCache(state);
+            ReadWeaponValues();
+            ReadArmorValues();
+
             uint processedRecords = 0;
             foreach(IArmorGetter? armorGetter in state.LoadOrder.PriorityOrder.Armor().WinningOverrides())
             {
@@ -485,7 +755,6 @@ namespace TrueUnleveledSkyrim.Patch
                 if (wasChanged)
                 {
                     state.PatchMod.Weapons.Set(weaponCopy);
-                    // Console.WriteLine("Patched weapon: " + weaponCopy.EditorID);
                 }
             }
 

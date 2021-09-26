@@ -17,6 +17,7 @@ namespace TrueUnleveledSkyrim.Patch
     public class LeveledItemsPatcher
     {
         private static ArtifactKeys? artifactKeys;
+        private static ExcludedLVLI? excludedLVLI;
 
         // Determines if a given leveled list holds artifacts or not based on the predefined EDID snippets in artifactKeys.json.
         private static bool IsArtifactList(LeveledItem itemList)
@@ -195,6 +196,8 @@ namespace TrueUnleveledSkyrim.Patch
         public static void PatchLVLI(IPatcherState<ISkyrimMod, ISkyrimModGetter> state)
         {
             artifactKeys = JsonHelper.LoadConfig<ArtifactKeys>(TUSConstants.ArtifactKeysPath);
+            excludedLVLI = JsonHelper.LoadConfig<ExcludedLVLI>(TUSConstants.ExcludedLVLIPath);
+            bool allowEmptyLists = Patcher.ModSettings.Value.Unleveling.Items.AllowEmptyLists;
 
             uint processedRecords = 0;
             foreach(var lvlItemGetter in state.LoadOrder.PriorityOrder.LeveledItem().WinningOverrides())
@@ -206,29 +209,58 @@ namespace TrueUnleveledSkyrim.Patch
                 {
                     int lvlMin, lvlMax;
 
-                    wasChanged |= RemoveRareItems(listCopy, Patcher.LinkCache);
-                    GetLevelBoundaries(listCopy, out lvlMin, out lvlMax);
-                    if (lvlMin != Int16.MaxValue && lvlMax != -1 && lvlMin != lvlMax)
+                    bool cullList = true;
+                    foreach(string? lvliKey in excludedLVLI.Keys)
                     {
-                        LeveledItem weakCopy = state.PatchMod.LeveledItems.AddNew();
-                        LeveledItem strongCopy = state.PatchMod.LeveledItems.AddNew();
-                        weakCopy.DeepCopyIn(listCopy);
-                        strongCopy.DeepCopyIn(listCopy);
-                        weakCopy.EditorID += TUSConstants.WeakPostfix;
-                        strongCopy.EditorID += TUSConstants.StrongPostfix;
-
-                        int lvlMed = (int)Math.Round((lvlMin + lvlMax) * 0.465);
-                        RemoveItemsWithRange(weakCopy, lvlMed + 1, lvlMax);
-                        RemoveItemsWithRange(strongCopy, lvlMin, lvlMed - 1);
-
-                        UnlevelList(weakCopy);
-                        UnlevelList(strongCopy);
-                        
-                        // Console.WriteLine("Added lists: " + weakCopy.EditorID + " and " + strongCopy.EditorID);
+                        if(listCopy.EditorID?.Contains(lvliKey, StringComparison.OrdinalIgnoreCase) ?? false)
+                        {
+                            cullList = false;
+                            foreach(string? forbiddenKey in excludedLVLI.ForbiddenKeys)
+                            {
+                                if(listCopy.EditorID?.Contains(lvliKey, StringComparison.OrdinalIgnoreCase) ?? false)
+                                {
+                                    cullList = true;
+                                    break;
+                                }
+                            }
+                            break;
+                        }
                     }
 
+                    if(cullList)
+                    {
+                        wasChanged |= RemoveRareItems(listCopy, Patcher.LinkCache);
+                        GetLevelBoundaries(listCopy, out lvlMin, out lvlMax);
+                        if (lvlMin != Int16.MaxValue && lvlMax != -1 && lvlMin != lvlMax)
+                        {
+                            LeveledItem weakCopy = new LeveledItem(state.PatchMod);
+                            LeveledItem strongCopy = new LeveledItem(state.PatchMod);
+                            weakCopy.DeepCopyIn(listCopy);
+                            strongCopy.DeepCopyIn(listCopy);
+                            weakCopy.EditorID += TUSConstants.WeakPostfix;
+                            strongCopy.EditorID += TUSConstants.StrongPostfix;
+
+                            int lvlMed = (int)Math.Round((lvlMin + lvlMax) * 0.465);
+                            RemoveItemsWithRange(weakCopy, lvlMed + 1, lvlMax);
+                            RemoveItemsWithRange(strongCopy, lvlMin, lvlMed - 1);
+
+                            UnlevelList(weakCopy);
+                            UnlevelList(strongCopy);
+
+                            if (weakCopy.Entries is not null && weakCopy.Entries.Any())
+                                state.PatchMod.LeveledItems.Set(weakCopy);
+                            if (strongCopy.Entries is not null && strongCopy.Entries.Any())
+                                state.PatchMod.LeveledItems.Set(strongCopy);
+                        }
+                    }
                 }
                 else wasChanged |= CullArtifactList(listCopy);
+
+                if (!allowEmptyLists && (listCopy.Entries is null || !listCopy.Entries.Any()))
+                {
+                    listCopy.DeepCopyIn(lvlItemGetter);
+                    wasChanged = false;
+                }
 
                 wasChanged |= UnlevelList(listCopy);
 
@@ -237,10 +269,7 @@ namespace TrueUnleveledSkyrim.Patch
                     Console.WriteLine("Processed " + processedRecords + " leveled item lists.");
 
                 if (wasChanged)
-                {
                     state.PatchMod.LeveledItems.Set(listCopy);
-                    // Console.WriteLine("Modifed leveled item list: " + listCopy.EditorID);
-                }
             }
 
             Console.WriteLine("Updating newly generated leveled list references.");

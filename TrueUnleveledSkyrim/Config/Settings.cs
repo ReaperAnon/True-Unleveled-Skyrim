@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+
+using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.WPF.Reflection.Attributes;
 
 
@@ -44,6 +47,10 @@ namespace TrueUnleveledSkyrim.Config
 
         [Tooltip("If enabled, artifact items will always have the highest level variant in the leveled list.")]
         public bool UnlevelArtifacts { get; set; } = true;
+
+
+        [Tooltip("If enabled, leveled item lists can become entirely empty if all entries in them are above the max item level set above. Otherwise, lists that would otherwise be emptied will stay as they were before but still unleveled.")]
+        public bool AllowEmptyLists { get; set; } = false;
     }
 
     public class TUSConfig_Zones
@@ -82,7 +89,7 @@ namespace TrueUnleveledSkyrim.Config
         public bool DisableExtraDamagePerks { get; set; } = true;
 
 
-        [Tooltip("If enabled, followers will scale 1:1 with the player with their maximum level cap being what their static level would be. They will still get skills and perks distributed as if they had their static levels, if enabled.")]
+        [Tooltip("If enabled, followers will scale 1:1 with the player with their maximum level cap being at least as high as their static level would be. They will still get skills and perks distributed as if they had their static levels, if enabled.")]
         public bool ScalingFollowers { get; set; } = true;
 
         [Tooltip("The amount of perk points NPCs get per every level they have. Set to 0 to not grant them any perks. The perks are distributed according to their requirements.")]
@@ -99,6 +106,22 @@ namespace TrueUnleveledSkyrim.Config
 
     public class TUSConfig_Morrowloot
     {
+        [Tooltip("The plugins from which the base stats of items will be read from and the relative value will be taken from based on the Morrowloot stats.")]
+        public List<ModKey> BaseStatPlugins { get; set; } = new()
+        {
+            "Skyrim.esm",
+            "Update.esm",
+            "Dawnguard.esm",
+            "HearthFires.esm",
+            "Dragonborn.esm",
+            "Unofficial Skyrim Special Edition Patch.esp"
+        };
+
+
+        /*[Tooltip("If enabled, nonexistent armor types like light daedric or ebony armors will have pre-made stats instead of them trying to be read from the supplied plugin list above.")]
+        public bool UsePrefabStats { get; set; } = true;**/
+
+
         [Tooltip("If enabled, skips stat adjusment on all items tagged as a \"Daedric Artifact\".")]
         public bool SkipArtifacts { get; set; } = false;
 

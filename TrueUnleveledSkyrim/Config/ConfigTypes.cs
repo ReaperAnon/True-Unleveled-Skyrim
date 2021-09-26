@@ -25,6 +25,13 @@ namespace TrueUnleveledSkyrim.Config
         [JsonProperty] public List<FollowerEntry> Followers { get; set; } = new();
     }
 
+    // excludedLVLI.json
+    public class ExcludedLVLI : ConfigType
+    {
+        [JsonProperty] public List<string> Keys { get; set; } = new();
+        [JsonProperty] public List<string> ForbiddenKeys { get; set; } = new();
+    }
+
     // excludedNPCs.json
     public class ExcludedNPCs : ConfigType
     {

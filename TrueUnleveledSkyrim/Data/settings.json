@@ -1,33 +1,40 @@
 {
   "Unleveling": {
     "UnlevelGame": true,
-    "Options": {
-      "Zones": {
-        "UseMorrowlootZoneBalance": true,
-        "StaticZoneLevels": true,
-        "EasySpawnLevelMult": 0.75,
-        "NormalSpawnLevelMult": 1.0,
-        "HardSpawnLevelMult": 1.25,
-        "VeryHardSpawnLevelMult": 1.5
-      },
-      "NPCs": {
-        "RemoveOldPerks": true,
-        "DisableExtraDamagePerks": true,
-        "ScalingFollowers": true,
-        "NPCPerksPerLevel": 1.0,
-        "NPCSkillsPerLevel": 9.5,
-        "NPCMaxSkillLevel": 100
-      },
-      "Items": {
-        "MaxItemLevel": 27,
-        "MinItemLevel": 0,
-        "UnlevelArtifacts": true
-      }
+    "Zones": {
+      "UseMorrowlootZoneBalance": true,
+      "StaticZoneLevels": true,
+      "EasySpawnLevelMult": 0.75,
+      "NormalSpawnLevelMult": 1.0,
+      "HardSpawnLevelMult": 1.25,
+      "VeryHardSpawnLevelMult": 1.5
+    },
+    "NPCs": {
+      "RemoveOldPerks": true,
+      "DisableExtraDamagePerks": true,
+      "ScalingFollowers": true,
+      "NPCPerksPerLevel": 1.0,
+      "NPCSkillsPerLevel": 9.5,
+      "NPCMaxSkillLevel": 100
+    },
+    "Items": {
+      "MaxItemLevel": 27,
+      "MinItemLevel": 0,
+      "UnlevelArtifacts": true,
+      "AllowEmptyLists": false
     }
   },
   "ItemAdjustments": {
     "MorrowlootifyItems": true,
     "Options": {
+      "BaseStatPlugins": [
+        "Skyrim.esm",
+        "Update.esm",
+        "Dawnguard.esm",
+        "HearthFires.esm",
+        "Dragonborn.esm",
+        "Unofficial Skyrim Special Edition Patch.esp"
+      ],
       "SkipArtifacts": false,
       "SkipUniques": false,
       "TemperingDebuff": true
