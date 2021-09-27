@@ -69,7 +69,7 @@ and another one that was based loosely off of Morrowloot. This just changes whic
 A list of editor IDs or editor ID snippets that if matched with a leveled item list record will have it be treated as an artifact list, meaning everything except the highest level item or items in it will be removed. Should be added to if you have a mod that adds artifacts and they don't each have their unique leveled item list or if you just want the functionality described above. The keys are case insensitive.
 
 ## customFollowers.json
-A list of entries comprised of single keys that are entire editor IDs or snippets and an array of ForbiddenKeys. Any NPC whose editor ID contains one of the listed keys but none of the possible forbidden keys associated with it will be treated as a follower for the NPC unleveling. The keys are case insensitive.
+A list of entries comprised of single keys that are entire editor IDs or snippets and an array of forbidden keys. Any NPC whose editor ID contains one of the listed keys but none of the possible forbidden keys associated with it will be treated as a follower for the NPC unleveling. The keys are case insensitive.
 
 ## excludedLVLI.json
 A list of keys and forbidden keys, each being an editor ID or editor ID snippet. When a key matches a leveled item list's editor ID and none of the forbidden keys do, they will not have any entries removed from them but they will still be de-leveled. By default used to make sure enchanted item sublists remain whole. The keys are case insensitive.
