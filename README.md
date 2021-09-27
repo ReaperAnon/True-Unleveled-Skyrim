@@ -1,3 +1,28 @@
-True Unleveled Skyrim
+# True Unleveled Skyrim
+A collection of patchers meant to unlevel the game and provide a Requiem and/or Morrowloot-style experience while being highly compatible and taking into account every little piece of your modlist, be that NPC overhauls, enemy overhauls, additional enemy or creature mods, new armors and weapons or perk overhauls.
 
-CURRENTLY IN DEVELOPMENT, USE AT OWN RISK
+## What it does
+Firstly, it changes Encounter Zones and sets their levels to a static number picked from a range or to a user-defined range, makes them always adhere to their minimum and maximum defined levels without matching the player and changes the spawn level multipliers for different enemy difficulties to provide a more consistent challenge to what the Encounter Zone is supposed to offer.
+
+Secondly, it changes NPCs to never scale in level depending on the player (unless they are followers, by default) and to have static levels assigned to them. Based on their assigned levels and their class (one handed warrior, mage, etc) they also get their skill levels re-calculated (which in vanilla are usually laughably low) resulting in high level enemies having their main skills maxed out.
+NPCs also get perks distributed by default, also based on their class, with their main skills being prioritized the most. They also get their old perks removed, but only the perks that originate from the vanilla Skyrim data files, leaving any mod-added perks safely in place. A high level NPC who is a one handed warrior will have a high one handed skill and plenty of perks in one handed, proving to be more of a challenge, but never getting perks that they are not eligible for with their current skill level. Extra damage perks which just straight up boosted the damage of NPCs regardless of skill level are also disabled by default.
+
+Thirdly, leveled item lists get unleveled and many of them modified to not contain items that should be exceedingly rare like glass, ebony and daedric equipment. The remaining items also get set to occur from level 1, meaning you can find anything on enemies or in shops from the start, ranging from iron to elven or orcish equipment.
+Artifact lists also get unleveled by default, rendering mods that unlevel artifacts useless since you will only ever get the strongest variant of Chillrend or Dragonbane to begin with.
+
+Fourthly, there is an option to "Morrowlootify" equipment. This means that all equipment in the current load order will receive stats they would have in Morrowloot, except without the compatibility and balancing nightmare it provides. The way it works is that the patcher takes the base stats of all rare equipment like Glass, Ebony, Daedric, etc from the supplied plugin list under the Options tab in Synthesis and then goes through every item. For every item the stats are checked and a ratio is calculated based on the difference between the vanilla armor value and the modded armor value. Say someone might have an armor variant mod that adds a stronger but heavier set of ebony armor that has 10% higher armor rating and weight, the patcher applies the Morrowloot stats to the armor set and increases those stats by 10%, keeping the relative balance but within the Morrowloot vision.
+The patcher doesn't fix badly balanced equipment, it merely brings them up to their Morrowloot counterparts while keeping their relative (good or bad) balance with the vanilla values.
+
+## The result
+With the default settings (and the recommended mods further down in the description) the experience is synonymous with a mod like Requiem or Morrowloot, giving a mostly unmoving world that doesn't revolve around the player, with all kinds of powerful items, enemies and riches being available from the very start of the game for the most daring players.
+The experience of course is highly customizable, possibly giving something more in-line with vanilla but still a lot more varied or something entirely different. It can be made easier, harder or somewhere in-between.
+
+## Recommended mods
+- NPC Stat Rescaler: Another patcher available through Synthesis, goes great with TUS by helping high level enemies to not be damage sponges. Also deeply customizable.
+- Morrowloot Miscellania: A mod on the Nexus that splits up Morrowloot into some different, smaller modules. I highly recommend using the Daedric Crafting Requirements, Dremora Bound Weapons and Item Distribution modules to have that nice bit of handcrafted feel to your game with hand-placed rare equipment while the other two provide some flair and balance.
+- Enemy overhaul/addition mods: Very highly recommended to use mods like these otherwise very high level areas won't have as much variety between each other. Can be something simple like High Level Enemies or something more involved like Revenge of the Enemies 2016 Modified and OBIS that I personally use. Skyrim Immersive Creatures and similar mods also work well for this.
+- A good perk overhaul: It can be anything you like as long as perks NPCs shouldn't use are marked with NoASIS in their editor ID. Enai's and Simon's perk mods are all compatible, others you'll have to see for yourself. I like Ordinator myself.
+- Spell mods: Whatever you like is best, but they are recommended here for the next suggestion.
+- Spell Perk Item Distributor configurations: Configs for SPID that distribute spells and potions (especially if based on NPC skill level and class) work beautifully here and along with the distributed perks from your favorite perk mod can make for some intense fights with high level NPCs while also making them clearly distinct from low level ones. 
+- A good combat mod: Again, it can be any combat mod you like that makes enemies smarter in combat and pose more of a threat. I use Valravn personally.
+- Skill Based Damage and Magnitude Multipliers: Not as needed for the optimal experience as the others but it really helps make up for the lack of the fake extra damage perks. It has to be converted for SSE, but I consider it a nice addition.
