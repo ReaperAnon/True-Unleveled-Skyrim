@@ -61,3 +61,36 @@ and another one that was based loosely off of Morrowloot. This just changes whic
 - **Morrowlootify Items:** Main toggle for patching weapons and armor to be similar to their Morrowloot counterparts.
   ### Options
 - **Base Stat Plugins:** This plugin list allows you to define which plugins the patcher takes the base item stats from for comparison and modification. For example, if someone has *Weapon Armor Clothing and Clutter Fixes* installed which increases the weight and armor value of rare equipment relative to vanilla, the patcher would then apply that ratio to the Morrowloot stats. If this is not something that person would want, they can add WACCF to the base stat plugins list which would make the patcher take those stats as the base value and not apply the ratio to the Morrowloot stats.
+- **Skip Artifacts:** Makes the stat rescaler skip adjusting everything that is marked with the "DaedricArtifact" tag. Useful if you have some mods that might make weird changes resulting in weird stats. Alternatively you could just correct those in a little xEdit patch.
+- **Skip Uniques:** Makes the stat rescaler skip adjusting everything that is marked with the "MagicDisallowEnchanting" tag. It basically skips every item that you would not be able to disenchant which includes the artifacts from the previous option. Again, just in case you have some specific weird setup where the numbers come out badly.
+
+## The configs
+## artifactKeys.json
+A list of editor IDs or editor ID snippets that if matched with a leveled item list record will have it be treated as an artifact list, meaning everything except the highest level item or items in it will be removed. Should be added to if you have a mod that adds artifacts and they don't each have their unique leveled item list or if you just want the functionality described above. The keys are case insensitive.
+
+## customFollowers.json
+A list of entries comprised of single keys that are entire editor IDs or snippets and an array of ForbiddenKeys. Any NPC whose editor ID contains one of the listed keys but none of the possible forbidden keys associated with it will be treated as a follower for the NPC unleveling. The keys are case insensitive.
+
+## excludedLVLI.json
+A list of keys and forbidden keys, each being an editor ID or editor ID snippet. When a key matches a leveled item list's editor ID and none of the forbidden keys do, they will not have any entries removed from them but they will still be de-leveled. By default used to make sure enchanted item sublists remain whole. The keys are case insensitive.
+
+## excludedNPCs.json
+A list of keys and forbidden keys, each being an editor ID or editor ID snippet. When a key matches an NPC's editor ID and none of the forbidden keys do, they will not be unleveled. The keys are case insensitive.
+
+## excludedPerks.json
+A list of keys and forbidden keys, each being an editor ID or editor ID snippet. When a key matches a perk's editor ID and none of the forbidden keys, it will be excluded from being given to NPCs. The keys are case insensitive.
+
+## NPCsByEDID.json
+A list of NPC entries, each being comprised by an array of keys, an array of forbidden keys and a level entry. When an NPC's editor ID matches one of the keys in an entry and none of the forbidden keys in it, they will be assigned the specific level in the entry. The keys are case insensitive.
+
+## NPCsByFaction.json
+A list of NPC entries, each being comprised by an array of keys, an array of forbidden keys and either a level entry or a minimum and maximum level entry. If any of a faction's editor IDs that an NPC belongs to contain one of the keys in an entry and none of the forbidden keys, that NPC will either get the flat level or a random level between the given minimum and maximum, depending on which were defined. The keys are case insensitive.
+
+## raceLevelModifiers.json
+Possibly the most versatile config file, containing entries each comprised of a set of keys, a set of forbidden keys and a LevelModifierAdd and LevelModifierMult field. If the editor ID of an NPC's race contains a key from an entry but none of the forbidden keys from it, they will have their level ranges modified. If an entry for "Draugr" is listed with a LevelModifierAdd value of 10 and a LevelModifierMult value of 1.2, then every draugr will have their level increased by 20% and then get a flat boost of 10. This would make a basic level 1 draugr variant have a level of 11 and a level 20 draugr variant have a level of 34. Similarly an entry for "Dragon" with an Add value of 50 and a Mult level of 0.2 would mean a level 1 dragon variant would have a level of 50 and a level 60 dragon variant would now have a level of 62. The keys are case insensitive.
+
+## zoneTypesByEDID.json
+A list of entries each comprised of an array of keys, forbidden keys and a minimum level, maximum level and level range value. If an encounter zone's editor ID matches a key in one of the entries but none of the forbidden keys in it, it will get a random level between the minimum and maximum value defined with a level distance of "range" between the minimum and maximum. The keys are case insensitive.
+
+## zoneTypesByKeyword.json
+A list of entries each comprised of an array of keys and forbidden keys and a minimum level, maximum level and level range value. If an encounter zone's location has any of the keywords listed in an entry and none of the ones in the forbidden keys array, it will get a random level between the minimum and maximum value defined with a level distance of "range" between the minimum and maximum. The keys are case insensitive.
