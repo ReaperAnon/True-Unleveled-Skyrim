@@ -200,7 +200,7 @@ namespace TrueUnleveledSkyrim.Patch
             bool allowEmptyLists = Patcher.ModSettings.Value.Unleveling.Items.AllowEmptyLists;
 
             uint processedRecords = 0;
-            foreach(var lvlItemGetter in state.LoadOrder.PriorityOrder.LeveledItem().WinningOverrides())
+            foreach(var lvlItemGetter in state.LoadOrder.PriorityOrder.LeveledItem().WinningOverrides().ToArray())
             {
                 bool wasChanged = false;
                 LeveledItem listCopy = lvlItemGetter.DeepCopy();

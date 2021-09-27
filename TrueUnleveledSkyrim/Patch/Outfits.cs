@@ -40,12 +40,12 @@ namespace TrueUnleveledSkyrim.Patch
         public static void PatchOutfits(IPatcherState<ISkyrimMod, ISkyrimModGetter> state)
         {
             uint processedRecords = 0;
-            foreach (IOutfitGetter? outfitGetter in state.LoadOrder.PriorityOrder.Outfit().WinningOverrides())
+            foreach (IOutfitGetter? outfitGetter in state.LoadOrder.PriorityOrder.Outfit().WinningOverrides().ToArray())
             {
                 if (outfitGetter.Items is null) continue;
 
-                Outfit weakCopy = new Outfit(state.PatchMod); // state.PatchMod.Outfits.AddNew();
-                Outfit strongCopy = new Outfit(state.PatchMod); // state.PatchMod.Outfits.AddNew();
+                Outfit weakCopy = new Outfit(state.PatchMod);
+                Outfit strongCopy = new Outfit(state.PatchMod);
                 weakCopy.DeepCopyIn(outfitGetter);
                 strongCopy.DeepCopyIn(outfitGetter);
                 weakCopy.EditorID += TUSConstants.WeakPostfix;
