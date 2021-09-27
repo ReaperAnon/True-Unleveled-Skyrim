@@ -38,9 +38,8 @@ namespace TrueUnleveledSkyrim
                 LeveledItemsPatcher.PatchLVLI(state);
                 OutfitsPatcher.PatchOutfits(state);
                 NPCsPatcher.PatchNPCs(state);
+                ZonesPatcher.PatchZones(state);
             }
-
-            ZonesPatcher.PatchZones(state);
 
             if (ModSettings.Value.ItemAdjustments.MorrowlootifyItems)
                 ItemsPatcher.PatchItems(state);

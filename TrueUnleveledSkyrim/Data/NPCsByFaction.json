@@ -1,20 +1,22 @@
 {
     "NPCs": [
-        {
-            "Keys": [
-                "CWImperialFaction",
-                "CWSonsFaction",
-                "GuardDialogueFaction",
-                "CWSonsFactionNPC"
-            ],
-            "MinLevel": 25,
-            "MaxLevel": 35
-        },
-        {
-            "Keys": [
-                "JobHousecarlFaction"
-            ],
-            "Level": 40
-        }
+      {
+        "Keys": [
+          "CWImperialFaction",
+          "CWSonsFaction",
+          "GuardDialogueFaction",
+          "CWSonsFactionNPC"
+        ],
+        "ForbiddenKeys": [],
+        "MinLevel": 25,
+        "MaxLevel": 35
+      },
+      {
+        "Keys": [
+          "JobHousecarlFaction"
+        ],
+        "ForbiddenKeys": [],
+        "Level": 40
+      }
     ]
 }
