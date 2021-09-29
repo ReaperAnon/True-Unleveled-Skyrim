@@ -164,7 +164,11 @@ namespace TrueUnleveledSkyrim.Patch
 
             if(npc.Configuration.Level is NpcLevel npcLevel)
             {
-                string usedPostfix = npcLevel.Level < 13 ? TUSConstants.WeakPostfix : npcLevel.Level > 27 ? TUSConstants.StrongPostfix : "";
+                string usedPostfix;
+                if(Patcher.ModSettings.Value.Unleveling.Items.AllowMidTier)
+                    usedPostfix = npcLevel.Level < 13 ? TUSConstants.WeakPostfix : npcLevel.Level > 27 ? TUSConstants.StrongPostfix : "";
+                else
+                    usedPostfix = npcLevel.Level <= 27 ? TUSConstants.WeakPostfix : npcLevel.Level > 27 ? TUSConstants.StrongPostfix : "";
                 if (!usedPostfix.IsNullOrEmpty())
                 {
                     foreach (ContainerEntry? entry in npc.Items.EmptyIfNull())

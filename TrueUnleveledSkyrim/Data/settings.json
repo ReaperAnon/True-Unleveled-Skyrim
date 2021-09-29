@@ -21,7 +21,8 @@
       "MaxItemLevel": 27,
       "MinItemLevel": 0,
       "UnlevelArtifacts": true,
-      "AllowEmptyLists": false
+      "AllowEmptyLists": false,
+      "AllowMidTier": false
     }
   },
   "ItemAdjustments": {

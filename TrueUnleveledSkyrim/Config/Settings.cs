@@ -51,6 +51,10 @@ namespace TrueUnleveledSkyrim.Config
 
         [Tooltip("If enabled, leveled item lists can become entirely empty if all entries in them are above the max item level set above. Otherwise, lists that would otherwise be emptied will stay as they were before but still unleveled.")]
         public bool AllowEmptyLists { get; set; } = false;
+
+
+        [Tooltip("If enabled, NPCs will also have a mid-tier item list instead of either having a strong or a weak sublist. The mid-tier one includes a selection of both the low and high tier items.")]
+        public bool AllowMidTier { get; set; } = false;
     }
 
     public class TUSConfig_Zones
