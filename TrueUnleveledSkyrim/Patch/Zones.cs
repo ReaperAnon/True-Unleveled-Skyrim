@@ -22,7 +22,7 @@ namespace TrueUnleveledSkyrim.Patch
         {
             encZone.Flags.SetFlag(EncounterZone.Flag.MatchPcBelowMinimumLevel, false);
             if(zoneDefinition.EnableCombatBoundary is not null)
-                encZone.Flags.SetFlag(EncounterZone.Flag.DisableCombatBoundary, (bool)zoneDefinition.EnableCombatBoundary);
+                encZone.Flags.SetFlag(EncounterZone.Flag.DisableCombatBoundary, !(bool)zoneDefinition.EnableCombatBoundary);
 
             if (Patcher.ModSettings.Value.Unleveling.Zones.StaticZoneLevels)
             {
