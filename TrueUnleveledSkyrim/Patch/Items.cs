@@ -253,21 +253,21 @@ namespace TrueUnleveledSkyrim.Patch
                 Dragonborn.Keyword.DLC2WeaponMaterialStalhrim, new Dictionary<IFormLinkGetter<IKeywordGetter>, WeaponValues>()
                 {
                     {Skyrim.Keyword.WeapTypeBattleaxe,      new WeaponValues(weaponDamage: 24, weaponWeight: 25, weaponPrice: 2150, weaponSpeed: 0.7f, weaponCritDamage: 12, weaponCritMult: 1,
-                                                                        weaponDamageMod: 29, weaponWeightMod: 26, weaponPriceMod: 2520, weaponSpeedMod: 0.7f, weaponCritDamageMod: 15, weaponCritMultMod: 1) },
+                                                                        weaponDamageMod: 29, weaponWeightMod: 20, weaponPriceMod: 2520, weaponSpeedMod: 0.77f, weaponCritDamageMod: 15, weaponCritMultMod: 1) },
                     {Skyrim.Keyword.WeapTypeBow,            new WeaponValues(weaponDamage: 17, weaponWeight: 15, weaponPrice: 1800, weaponSpeed: 0.5625f, weaponCritDamage: 8, weaponCritMult: 1,
-                                                                        weaponDamageMod: 22, weaponWeightMod: 15, weaponPriceMod: 1850, weaponSpeedMod: 0.5625f, weaponCritDamageMod: 11, weaponCritMultMod: 1) },
+                                                                        weaponDamageMod: 22, weaponWeightMod: 12, weaponPriceMod: 1850, weaponSpeedMod: 0.87505f, weaponCritDamageMod: 11, weaponCritMultMod: 1) },
                     {Skyrim.Keyword.WeapTypeDagger,         new WeaponValues(weaponDamage: 10, weaponWeight: 4.5f, weaponPrice: 395, weaponSpeed: 1.3f, weaponCritDamage: 5, weaponCritMult: 1,
-                                                                        weaponDamageMod: 14, weaponWeightMod: 4.5f, weaponPriceMod: 965, weaponSpeedMod: 1.3f, weaponCritDamageMod: 7, weaponCritMultMod: 1) },
+                                                                        weaponDamageMod: 14, weaponWeightMod: 2.5f, weaponPriceMod: 965, weaponSpeedMod: 1.43f, weaponCritDamageMod: 7, weaponCritMultMod: 1) },
                     {Skyrim.Keyword.WeapTypeGreatsword,     new WeaponValues(weaponDamage: 23, weaponWeight: 21, weaponPrice: 1970, weaponSpeed: 0.75f, weaponCritDamage: 11, weaponCritMult: 1,
-                                                                        weaponDamageMod: 28, weaponWeightMod: 21, weaponPriceMod: 2100, weaponSpeedMod: 0.8f, weaponCritDamageMod: 14, weaponCritMultMod: 1) },
+                                                                        weaponDamageMod: 28, weaponWeightMod: 17, weaponPriceMod: 2100, weaponSpeedMod: 0.88f, weaponCritDamageMod: 14, weaponCritMultMod: 1) },
                     {Skyrim.Keyword.WeapTypeMace,           new WeaponValues(weaponDamage: 16, weaponWeight: 18, weaponPrice: 1375, weaponSpeed: 0.8f, weaponCritDamage: 8, weaponCritMult: 1,
-                                                                        weaponDamageMod: 19, weaponWeightMod: 18, weaponPriceMod: 2015, weaponSpeedMod: 0.8f, weaponCritDamageMod: 9, weaponCritMultMod: 1) },
+                                                                        weaponDamageMod: 19, weaponWeightMod: 13, weaponPriceMod: 2015, weaponSpeedMod: 0.88f, weaponCritDamageMod: 9, weaponCritMultMod: 1) },
                     {Skyrim.Keyword.WeapTypeSword,          new WeaponValues(weaponDamage: 13, weaponWeight: 14, weaponPrice: 985, weaponSpeed: 1, weaponCritDamage: 6, weaponCritMult: 1,
-                                                                        weaponDamageMod: 17, weaponWeightMod: 14, weaponPriceMod: 1435, weaponSpeedMod: 1, weaponCritDamageMod: 8, weaponCritMultMod: 1) },
+                                                                        weaponDamageMod: 17, weaponWeightMod: 7.5f, weaponPriceMod: 1435, weaponSpeedMod: 1.1f, weaponCritDamageMod: 8, weaponCritMultMod: 1) },
                     {Skyrim.Keyword.WeapTypeWarAxe,         new WeaponValues(weaponDamage: 15, weaponWeight: 16, weaponPrice: 1180, weaponSpeed: 0.9f, weaponCritDamage: 7, weaponCritMult: 1,
-                                                                        weaponDamageMod: 18, weaponWeightMod: 16, weaponPriceMod: 1715, weaponSpeedMod: 0.9f, weaponCritDamageMod: 9, weaponCritMultMod: 1) },
+                                                                        weaponDamageMod: 18, weaponWeightMod: 9, weaponPriceMod: 1715, weaponSpeedMod: 0.99f, weaponCritDamageMod: 9, weaponCritMultMod: 1) },
                     {Skyrim.Keyword.WeapTypeWarhammer,      new WeaponValues(weaponDamage: 26, weaponWeight: 29, weaponPrice: 2850, weaponSpeed: 0.6f, weaponCritDamage: 13, weaponCritMult: 1,
-                                                                        weaponDamageMod: 31, weaponWeightMod: 30, weaponPriceMod: 3030, weaponSpeedMod: 0.6f, weaponCritDamageMod: 15, weaponCritMultMod: 1) }
+                                                                        weaponDamageMod: 31, weaponWeightMod: 22, weaponPriceMod: 3030, weaponSpeedMod: 0.77f, weaponCritDamageMod: 15, weaponCritMultMod: 1) }
                 }
             }
         };
