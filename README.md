@@ -2,7 +2,7 @@
 # True Unleveled Skyrim
 A collection of patchers meant to unlevel the game and provide a Requiem and/or Morrowloot-style experience while being highly compatible and taking into account every little piece of your modlist, be that NPC overhauls, enemy overhauls, additional enemy or creature mods, new armors and weapons or perk overhauls.
 
-## What it does
+## What it Does
 Firstly, it changes Encounter Zones and sets their levels to a static number picked from a range or to a user-defined range, makes them always adhere to their minimum and maximum defined levels without matching the player and changes the spawn level multipliers for different enemy difficulties to provide a more consistent challenge to what the Encounter Zone is supposed to offer.
 
 Secondly, it changes NPCs to never scale in level depending on the player (unless they are followers, by default) and to have static levels assigned to them. Based on their assigned levels and their class (one handed warrior, mage, etc) they also get their skill levels re-calculated (which in vanilla are usually laughably low) resulting in high level enemies having their main skills maxed out.
@@ -17,11 +17,11 @@ The way it works is that the patcher takes the base stats of all rare equipment 
 Say someone might have an armor variant mod that adds a stronger but heavier set of ebony armor that has 10% higher armor rating and weight, the patcher applies the Morrowloot stats to the armor set and increases those stats by 10%, keeping the relative balance but within the Morrowloot vision.
 The patcher doesn't fix badly balanced equipment, it merely brings them up to their Morrowloot counterparts while keeping their relative (good or bad) balance with the vanilla values.
 
-## The result
+## The Result
 With the default settings (and the recommended mods further down in the description) the experience is synonymous with a mod like Requiem or Morrowloot, giving a mostly unmoving world that doesn't revolve around the player, with all kinds of powerful items, enemies and riches being available from the very start of the game for the most daring players.
 The experience of course is highly customizable, possibly giving something more in-line with vanilla but still a lot more varied or something entirely different. It can be made easier, harder or somewhere in-between.
 
-## Recommended mods
+## Recommended Mods
 - **[NPC Stat Rescaler](https://github.com/theSkyseS/NPCStatRescaler):** Another patcher available through Synthesis, goes great with TUS by helping high level enemies to not be damage sponges. Also deeply customizable.
 - **[Morrowloot Miscellania](https://www.nexusmods.com/skyrimspecialedition/mods/27094):** A mod on the Nexus that splits up Morrowloot into some different, smaller modules. I highly recommend using the Daedric Crafting Requirements, Dremora Bound Weapons, Hybrid Loot and Item Distribution modules to have that nice bit of handcrafted feel to your game with hand-placed rare equipment while the others provide some flair and balance.
 - **[Enemy overhaul/addition mods](https://www.nexusmods.com/skyrimspecialedition/mods/2969):** Very highly recommended to use mods like these otherwise very high level areas won't have as much variety between each other. Can be something simple like High Level Enemies or something more involved like *Revenge of the Enemies 2016 Modified, Revenge of the Enemies Rescaled Immunities and OBIS* that I personally use. Skyrim Immersive Creatures and similar mods also work well for this.
@@ -31,12 +31,12 @@ The experience of course is highly customizable, possibly giving something more 
 - **[A good combat mod](https://www.nexusmods.com/skyrimspecialedition/mods/53869):** Again, it can be any combat mod you like that makes enemies smarter in combat and pose more of a threat. I use Valravn personally.
 - **[Mortal Enemies - Rival Remix](https://github.com/Synthesis-Collective/MortalEnemies-Patcher):** Another Synthesis patcher to remove the excessive tracking NPCs have in combat. Make sure to use the Rival Remix option to not have it feel too stiff.
 
-These are what I would consider a good foundation to use TUS with (at least with the default settings, otherwise it may vary). The stat rescales and small morrowloot plugins I would consider essential, peronsally.
+These are what I would consider a good foundation to use TUS with (at least with the default settings, otherwise it may vary). The stat rescales and small morrowloot plugins I would consider essential, personally.
 
-# How to use
+# How to Use
 In this section I'll explain what the patcher settings do first and then how to modify and set up the config files for your own load order if the default ones don't sit well with it.
 
-## The settings
+## The Settings
 ### Unleveling
 - **Unlevel Game:** The main toggle controlling whether or not the leveled item lists, outfits, encounter zones and NPCs get patched.
   ### Zones
@@ -64,7 +64,7 @@ and another one that was based loosely off of Morrowloot. This just changes whic
 - **Skip Artifacts:** Makes the stat rescaler skip adjusting everything that is marked with the "DaedricArtifact" tag. Useful if you have some mods that might make weird changes resulting in weird stats. Alternatively you could just correct those in a little xEdit patch.
 - **Skip Uniques:** Makes the stat rescaler skip adjusting everything that is marked with the "MagicDisallowEnchanting" tag. It basically skips every item that you would not be able to disenchant which includes the artifacts from the previous option. Again, just in case you have some specific weird setup where the numbers come out badly.
 
-## The configs
+## The Configs
 ### artifactKeys.json
 A list of editor IDs or editor ID snippets that if matched with a leveled item list record will have it be treated as an artifact list, meaning everything except the highest level item or items in it will be removed. Should be added to if you have a mod that adds artifacts and they don't each have their unique leveled item list or if you just want the functionality described above. The keys are case insensitive.
 
