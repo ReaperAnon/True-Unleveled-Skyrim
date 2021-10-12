@@ -41,16 +41,15 @@ In this section I'll explain what the patcher settings do first and then how to 
 
 ## The Settings
 ### Unleveling
-- **Unlevel Zones:** Encounter zones get unleveled if it's checked.
   ### Zones
+- **Unlevel Zones:** Encounter zones get unleveled if it's checked.
 - **Use Morrowloot Zone Balance:** There are 2 sets of config files for zones, the default ones that were included with TUS
 and another one that was based loosely off of Morrowloot. This just changes which set of files is used.
 - **Static Zone Levels:** Normally in the config file a minimum and maximum level and a level range (variance between min and max) can be set for areas. If this option is turned on, the level ranges are not used and it just randomly assigns a level from the min-max range for the encounter zone in question with no variance.
 - **Spawn Level Mult:** The level multiplier for enemies marked as "Easy", "Normal", etc. They will be around the current level of the encounter zone times the multiplier provided.
 
-
-- **Unlevel NPCs:** NPCs get unleveled if it's checked.
   ### NPCs
+- **Unlevel NPCs:** NPCs get unleveled if it's checked.
 - **Remove Old Perks:** NPCs will have all of their already existing perks removed, but only perks that come from the vanilla Skyrim data files like Skyrim.esm, Dawnguard.esm, Dragonborn.esm and Update.esm. This means if a mod like Revenge of the Enemies adds perks, those will stay.
 - **Disable Extra Damage Perks:** There are several perks in the game that simply multiply NPC damage for no real reason except them being high level. This is something I believe to be bad design and should be done with higher skill levels, perks and better gear, not to mention that one handed weapons get more of a boost than two handed so high level melee enemies had barely any difference between 1/2 handed weapon damage. This option makes those perks do nothing, but doesn't delete them.
 - **Scaling Followers:** If enabled, followers will still keep to the old formula of scaling along with the player in level, so their health, stamina and magicka will slowly improve as you level up alongside them. If turned off, followers will have a static level assigned. Even if this option is turned on, **followers still get perks and skills based on what their static level would be** so no worries there.
@@ -58,9 +57,8 @@ and another one that was based loosely off of Morrowloot. This just changes whic
 - **NPC Skills Per Level:** The number of skillpoints they get to assign to their class skills per level. The points are distributed based on their classes which have different weights for what skills get more points and what skills get less. These also technically control the kinds of perks they can get because they have to meet the requirements just like the player.
 - **NPC Max Skill Level:** What it says, really. If you set it to above 100 NPCs can have skills go above 100 (if they have enough skill points for that, of course).
 
-
-- **Unlevel Items:** Items get unleveled if it's checked.
   ### Items
+- **Unlevel Items:** Items get unleveled if it's checked.
 - **Max Item Level:** The level starting from which items are removed in the leveled item lists. The tooltip gives you a rough level range for each item tier. Those tiers can be different of course if you have mods installed that change the leveled lists. The default should be fine for most people.
 - **Min Item Level:** The level below which items are removed in the leveled item lists. Recommended to be set to zero but if you have some weird setup where you only play some large quest mods you could remove low-tier weapons with it.
 - **Unlevel Artifacts:** What it says, but done differently from mods on the Nexus. What this does is if a list only contains item variants (or if it corresponds to a key in the config, but more on the configs later) then everything except the highest level one will be deleted. This means that weapons like Chillrend or Dragonbane will only ever have their strongest variants pop up in-game without having to change all 6 of their different leveled variants.
