@@ -33,16 +33,26 @@ namespace TrueUnleveledSkyrim
             LinkCache = state.LoadOrder.ListedOrder.ToImmutableLinkCache();
 
             TUSConstants.GetPaths(state);
-            if (ModSettings.Value.Unleveling.UnlevelGame)
+            if (ModSettings.Value.Unleveling.UnlevelItems)
             {
                 LeveledItemsPatcher.PatchLVLI(state);
                 OutfitsPatcher.PatchOutfits(state);
+            }
+
+            if (ModSettings.Value.Unleveling.UnlevelNPCs)
+            {
                 NPCsPatcher.PatchNPCs(state);
+            }
+
+            if (ModSettings.Value.Unleveling.UnlevelZones)
+            {
                 ZonesPatcher.PatchZones(state);
             }
 
             if (ModSettings.Value.ItemAdjustments.MorrowlootifyItems)
+            {
                 ItemsPatcher.PatchItems(state);
+            }
         }
     }
 }

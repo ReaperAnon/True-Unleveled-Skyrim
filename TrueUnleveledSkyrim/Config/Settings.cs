@@ -16,13 +16,23 @@ namespace TrueUnleveledSkyrim.Config
 
     public class TUSConfig_LeveledLists
     {
-        [Tooltip("If enabled, leveled item lists will be unleveled and purged of items higher or lower than the specified levels.")]
-        public bool UnlevelGame { get; set; } = true;
-
+        [Tooltip("If enabled, Encounter Zones will be unleveled according to the specified settings.")]
+        public bool UnlevelZones { get; set; } = true;
 
         public TUSConfig_Zones Zones { get; set; } = new();
+
+
+        [Tooltip("If enabled, NPCs will be unleveled according to the specified settings.")]
+        [SettingName("Unlevel NPCs")]
+        public bool UnlevelNPCs { get; set; } = true;
+
         [SettingName("NPCs")]
         public TUSConfig_NPCs NPCs { get; set; } = new();
+
+
+        [Tooltip("If enabled, items will be unleveled according to the specified settings.")]
+        public bool UnlevelItems { get; set; } = true;
+
         public TUSConfig_Items Items { get; set; } = new();
     }
 

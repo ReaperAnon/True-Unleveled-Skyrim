@@ -97,8 +97,7 @@ namespace TrueUnleveledSkyrim.Patch
 
             if(itemData.Level == maxLevel && !shouldRemove)
             {
-                IItemGetter resolvedItem = itemData.Reference.Resolve(linkCache);
-                if(resolvedItem is not null && resolvedItem.EditorID is not null)
+                if(itemData.Reference.TryResolve(linkCache, out var resolvedItem) && resolvedItem.EditorID is not null)
                     shouldRemove = resolvedItem.EditorID.ToLower().Contains("glass");
             }
 
@@ -127,12 +126,10 @@ namespace TrueUnleveledSkyrim.Patch
             bool wasChanged = false;
             foreach (var entry in itemList.Entries.EmptyIfNull())
             {
-                if (entry.Data == null) continue;
-                if (entry.Data.Level != 1)
-                {
-                    entry.Data.Level = 1;
-                    wasChanged = true;
-                }
+                if (entry.Data == null || entry.Data.Level == 1) continue;
+
+                entry.Data.Level = 1;
+                wasChanged = true;
             }
 
             return wasChanged;
