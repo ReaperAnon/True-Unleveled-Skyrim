@@ -44,8 +44,8 @@ namespace TrueUnleveledSkyrim.Patch
             {
                 if (outfitGetter.Items is null) continue;
 
-                Outfit weakCopy = new Outfit(state.PatchMod);
-                Outfit strongCopy = new Outfit(state.PatchMod);
+                Outfit weakCopy = new(state.PatchMod);
+                Outfit strongCopy = new(state.PatchMod);
                 weakCopy.DeepCopyIn(outfitGetter);
                 strongCopy.DeepCopyIn(outfitGetter);
                 weakCopy.EditorID += TUSConstants.WeakPostfix;

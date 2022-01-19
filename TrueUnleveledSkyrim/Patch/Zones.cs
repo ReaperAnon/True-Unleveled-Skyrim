@@ -39,15 +39,17 @@ namespace TrueUnleveledSkyrim.Patch
         private static bool PatchZonesByKeyword(EncounterZone encZone, ILinkCache linkCache)
         {
             if (!encZone.Location.TryResolve<ILocationGetter>(linkCache, out ILocationGetter? resolvedLocation)) return false;
-            foreach (var keywordEntry in resolvedLocation.Keywords.EmptyIfNull())
+
+            for (int i = ZonesByKeyword!.Zones.Count - 1; i >= 0; i--)
             {
-                if (!keywordEntry.TryResolve<IKeywordGetter>(linkCache, out IKeywordGetter? resolvedKeyword)) continue;
-                foreach (ZoneEntry? zoneDefinition in ZonesByKeyword!.Zones)
+                ZoneEntry? zoneDefinition = ZonesByKeyword.Zones[i];
+                foreach (var keywordEntry in resolvedLocation.Keywords.EmptyIfNull())
                 {
+                    if (!keywordEntry.TryResolve<IKeywordGetter>(linkCache, out IKeywordGetter? resolvedKeyword)) continue;
                     foreach (string? keyEntry in zoneDefinition.Keys)
                     {
                         bool willChange = false;
-                        if (resolvedKeyword.EditorID is not null && resolvedKeyword.EditorID.Contains(keyEntry))
+                        if (resolvedKeyword.EditorID is not null && resolvedKeyword.EditorID.Contains(keyEntry, StringComparison.OrdinalIgnoreCase))
                         {
                             willChange = true;
                             foreach(string? forbiddenKey in zoneDefinition.ForbiddenKeys)
@@ -69,13 +71,14 @@ namespace TrueUnleveledSkyrim.Patch
             return false;
         }
 
-        private static bool PatchZonesByID(EncounterZone encZone, ILinkCache linkCache)
+        private static bool PatchZonesByID(EncounterZone encZone)
         {
-            foreach (ZoneEntry? zoneDefinition in ZonesByID!.Zones)
+            for(int i = ZonesByID!.Zones.Count - 1; i >= 0; i--)
             {
+                ZoneEntry? zoneDefinition = ZonesByID.Zones[i];
                 foreach (string? idEntry in zoneDefinition.Keys)
                 {
-                    if (encZone.EditorID is not null && encZone.EditorID.Contains(idEntry))
+                    if (encZone.EditorID is not null && encZone.EditorID.Contains(idEntry, StringComparison.OrdinalIgnoreCase))
                     {
                         bool willChange = true;
                         foreach (var forbiddenKey in zoneDefinition.ForbiddenKeys)
@@ -115,7 +118,7 @@ namespace TrueUnleveledSkyrim.Patch
                 bool wasChanged = false;
                 EncounterZone zoneCopy = zoneGetter.DeepCopy();
 
-                wasChanged = PatchZonesByID(zoneCopy, Patcher.LinkCache) || PatchZonesByKeyword(zoneCopy, Patcher.LinkCache);
+                wasChanged = PatchZonesByID(zoneCopy) || PatchZonesByKeyword(zoneCopy, Patcher.LinkCache);
 
                 ++processedRecords;
                 if (processedRecords % 100 == 0)

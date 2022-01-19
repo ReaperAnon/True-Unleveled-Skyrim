@@ -25,6 +25,44 @@ namespace TrueUnleveledSkyrim.Patch
         private static NPCFactions? customNPCsByFaction;
         private static RaceModifiers? raceModifiers;
 
+        private static bool IsUndead(Npc npc, ILinkCache linkCache)
+        {
+            IFormLinkGetter<IKeywordGetter> undeadKeyword = Skyrim.Keyword.ActorTypeUndead.AsGetter();
+            foreach (var keywordEntry in npc.Keywords.EmptyIfNull())
+            {
+                if (keywordEntry.Equals(undeadKeyword))
+                    return true;
+            }
+
+            if (!npc.Race.TryResolve(linkCache, out var resolvedRace)) return false;
+            foreach (var keywordEntry in resolvedRace.Keywords.EmptyIfNull())
+            {
+                if (keywordEntry.Equals(undeadKeyword))
+                    return true;
+            }
+
+            return false;
+        }
+
+        private static bool IsVampire(Npc npc, ILinkCache linkCache)
+        {
+            IFormLinkGetter<IKeywordGetter> vampireKeyword = Skyrim.Keyword.Vampire.AsGetter();
+            foreach (var keywordEntry in npc.Keywords.EmptyIfNull())
+            {
+                if (keywordEntry.Equals(vampireKeyword))
+                    return true;
+            }
+
+            if (!npc.Race.TryResolve(linkCache, out var resolvedRace)) return false;
+            foreach (var keywordEntry in resolvedRace.Keywords.EmptyIfNull())
+            {
+                if (keywordEntry.Equals(vampireKeyword))
+                    return true;
+            }
+
+            return false;
+        }
+
         // Returns the level modifiers for the desired NPC based on their race.
         private static void GetLevelMultiplier(Npc npc, ILinkCache linkCache, out short levelModAdd, out float levelModMult)
         {
@@ -125,8 +163,7 @@ namespace TrueUnleveledSkyrim.Patch
         // Gives all NPCs that revolve around the player a static level and applies level modifiers.
         private static bool SetStaticLevel(Npc npc, ILinkCache linkCache)
         {
-            short levelModAdd; float levelModMult;
-            GetLevelMultiplier(npc, linkCache, out levelModAdd, out levelModMult);
+            GetLevelMultiplier(npc, linkCache, out short levelModAdd, out float levelModMult);
             bool wasChanged = GetNPCLevelByEDID(npc, levelModAdd, levelModMult) || GetNPCLevelByFaction(npc, linkCache, levelModAdd, levelModMult);
 
             if (wasChanged) return true;
@@ -275,16 +312,16 @@ namespace TrueUnleveledSkyrim.Patch
         private static bool PerformCompare<T>(IConditionGetter? perkCondition, T lValue, T rValue ) where T : IComparable<T>
         {
             if (perkCondition is null) return false;
-            switch(perkCondition.CompareOperator)
+            return perkCondition.CompareOperator switch
             {
-                case CompareOperator.EqualTo:               return lValue.CompareTo(rValue) ==  0;
-                case CompareOperator.GreaterThan:           return lValue.CompareTo(rValue) >   0;
-                case CompareOperator.GreaterThanOrEqualTo:  return lValue.CompareTo(rValue) >=  0;
-                case CompareOperator.LessThan:              return lValue.CompareTo(rValue) <   0;
-                case CompareOperator.LessThanOrEqualTo:     return lValue.CompareTo(rValue) <=  0;
-                case CompareOperator.NotEqualTo:            return lValue.CompareTo(rValue) !=  0;
-                    default: return false;
-            }
+                CompareOperator.EqualTo => lValue.CompareTo(rValue) == 0,
+                CompareOperator.GreaterThan => lValue.CompareTo(rValue) > 0,
+                CompareOperator.GreaterThanOrEqualTo => lValue.CompareTo(rValue) >= 0,
+                CompareOperator.LessThan => lValue.CompareTo(rValue) < 0,
+                CompareOperator.LessThanOrEqualTo => lValue.CompareTo(rValue) <= 0,
+                CompareOperator.NotEqualTo => lValue.CompareTo(rValue) != 0,
+                _ => false,
+            };
         }
 
         private static void RemoveOldPerks(Npc npc)
@@ -328,6 +365,9 @@ namespace TrueUnleveledSkyrim.Patch
 
         private static bool DistributeNPCPerks(Npc npc, ILinkCache linkCache)
         {
+            if (Patcher.ModSettings.Value.Unleveling.NPCs.NoUndeadPerks && IsUndead(npc, linkCache)) return false;
+            if (Patcher.ModSettings.Value.Unleveling.NPCs.NoVampirePerks && IsVampire(npc, linkCache)) return false;
+
             bool removeOldPerks = Patcher.ModSettings.Value.Unleveling.NPCs.RemoveOldPerks;
             float perksPerLevel = Patcher.ModSettings.Value.Unleveling.NPCs.NPCPerksPerLevel;
             if(perksPerLevel > 0)

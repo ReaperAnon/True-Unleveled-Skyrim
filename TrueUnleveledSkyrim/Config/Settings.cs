@@ -106,6 +106,15 @@ namespace TrueUnleveledSkyrim.Config
         [Tooltip("If enabled, followers will scale 1:1 with the player with their maximum level cap being at least as high as their static level would be. They will still get skills and perks distributed as if they had their static levels, if enabled.")]
         public bool ScalingFollowers { get; set; } = true;
 
+
+        [Tooltip("If enabled, any npcs marked as undead will not have perks distributed for them.")]
+        public bool NoUndeadPerks { get; set; } = false;
+
+
+        [Tooltip("If enabled, any npcs marked as vampires will not have perks distributed for them.")]
+        public bool NoVampirePerks { get; set; } = false;
+
+
         [Tooltip("The amount of perk points NPCs get per every level they have. Set to 0 to not grant them any perks. The perks are distributed according to their requirements.")]
         public float NPCPerksPerLevel { get; set; } = 1f;
 
