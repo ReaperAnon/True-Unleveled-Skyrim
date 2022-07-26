@@ -130,12 +130,12 @@ namespace TrueUnleveledSkyrim.Patch
             {
                 IFactionGetter? faction = rankEntry.Faction.TryResolve(linkCache);
 
-                if (faction is null) continue;
+                if (faction is null || faction.EditorID is null) continue;
                 foreach (NPCFactionEntry? dataSet in customNPCsByFaction!.NPCs)
                 {
                     foreach (string? factionKey in dataSet.Keys)
                     {
-                        if (faction.EditorID!.Contains(factionKey, StringComparison.OrdinalIgnoreCase))
+                        if (faction.EditorID.Contains(factionKey, StringComparison.OrdinalIgnoreCase))
                         {
                             bool willChange = true;
                             foreach (string? exclusionKey in dataSet.ForbiddenKeys)
