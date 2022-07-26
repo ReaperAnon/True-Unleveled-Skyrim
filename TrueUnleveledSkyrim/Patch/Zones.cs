@@ -31,8 +31,16 @@ namespace TrueUnleveledSkyrim.Patch
             }
             else
             {
-                encZone.MinLevel = (sbyte)Patcher.Randomizer.Next(zoneDefinition.MinLevel, zoneDefinition.MaxLevel - zoneDefinition.Range + 1);
-                encZone.MaxLevel = (sbyte)(encZone.MinLevel + zoneDefinition.Range);
+                if (zoneDefinition.MaxLevel == 0)
+                {
+                    encZone.MinLevel = (sbyte)Patcher.Randomizer.Next(zoneDefinition.MinLevel, zoneDefinition.MinLevel + zoneDefinition.Range);
+                    encZone.MaxLevel = 0;
+                }
+                else
+                {
+                    encZone.MinLevel = (sbyte)Patcher.Randomizer.Next(zoneDefinition.MinLevel, zoneDefinition.MaxLevel - zoneDefinition.Range + 1);
+                    encZone.MaxLevel = (sbyte)(encZone.MinLevel + zoneDefinition.Range);
+                }
             }
         }
 
