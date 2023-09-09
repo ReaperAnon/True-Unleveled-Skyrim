@@ -13,7 +13,7 @@ namespace TrueUnleveledSkyrim.Patch
 {
     class ItemsPatcher
     {
-        private static ILinkCache baseCache { get; set; } = null!;
+        private static ILinkCache BaseCache { get; set; } = null!;
 
         // A struct to hold the original and morrowloot-inspired stats of an armor.
         private class ArmorValues
@@ -122,11 +122,6 @@ namespace TrueUnleveledSkyrim.Patch
             Dragonborn.Weapon.DLC2StalhrimWarhammer
         };
 
-        private static void LoadBaseCache(IPatcherState<ISkyrimMod, ISkyrimModGetter> state)
-        {
-            baseCache = LoadOrder.Import<ISkyrimModGetter>(state.DataFolderPath, Patcher.ModSettings.Value.ItemAdjustments.Options.BaseStatPlugins, Mutagen.Bethesda.GameRelease.SkyrimSE).ListedOrder.ToImmutableLinkCache();
-        }
-
         private static bool GetWeaponKeyword(IWeaponGetter resolvedItem, List<IFormLinkGetter<IKeywordGetter>> keyList, out IFormLinkGetter<IKeywordGetter>? availableKey)
         {
             availableKey = null;
@@ -146,9 +141,9 @@ namespace TrueUnleveledSkyrim.Patch
 
         private static void ReadWeaponValues()
         {
-            foreach(IFormLink<IWeaponGetter> weaponLink in BaseWeapons)
+            foreach(var weaponLink in BaseWeapons)
             {
-                var resolvedWeapon = weaponLink.TryResolve(baseCache);
+                var resolvedWeapon = weaponLink.TryResolve(BaseCache);
                 if (resolvedWeapon is null) continue;
                 if (!GetWeaponKeyword(resolvedWeapon, WeaponMaterialKeywords, out var weaponMaterial)) continue;
                 if (!GetWeaponKeyword(resolvedWeapon, WeaponTypeKeywords, out var weaponType)) continue;
@@ -163,7 +158,7 @@ namespace TrueUnleveledSkyrim.Patch
         }
 
         // Dictionary to match weapon materials and types to their corresponding stats.
-        private static Dictionary<IFormLinkGetter<IKeywordGetter>, Dictionary<IFormLinkGetter<IKeywordGetter>, WeaponValues>> weaponKeys = new Dictionary<IFormLinkGetter<IKeywordGetter>, Dictionary<IFormLinkGetter<IKeywordGetter>, WeaponValues>>()
+        private static readonly Dictionary<IFormLinkGetter<IKeywordGetter>, Dictionary<IFormLinkGetter<IKeywordGetter>, WeaponValues>> weaponKeys = new()
         {
             {
                 Skyrim.Keyword.WeapMaterialDaedric, new Dictionary<IFormLinkGetter<IKeywordGetter>, WeaponValues>()
@@ -272,6 +267,7 @@ namespace TrueUnleveledSkyrim.Patch
             }
         };
 
+
         private static List<IFormLinkGetter<IKeywordGetter>> ArmorMaterialKeywords { get; } = new List<IFormLinkGetter<IKeywordGetter>>
         {
             Skyrim.Keyword.ArmorMaterialDaedric,
@@ -361,9 +357,9 @@ namespace TrueUnleveledSkyrim.Patch
 
         private static void ReadArmorValues()
         {
-            foreach (IFormLink<IArmorGetter> armorLink in BaseArmors)
+            foreach (var armorLink in BaseArmors)
             {
-                var resolvedArmor = armorLink.TryResolve(baseCache);
+                var resolvedArmor = armorLink.TryResolve(BaseCache);
                 if (resolvedArmor is null) continue;
                 if (!GetArmorKeyword(resolvedArmor, ArmorMaterialKeywords, out var armorMaterial)) continue;
                 if (!GetArmorKeyword(resolvedArmor, ArmorTypeKeywords, out var armorType)) continue;
@@ -429,9 +425,8 @@ namespace TrueUnleveledSkyrim.Patch
             }
         }
 
-
-        // Read-only dictionary to match armor materials, types and pieces to thheir corresponding stats.
-        private static Dictionary<IFormLinkGetter<IKeywordGetter>, Dictionary<IFormLinkGetter<IKeywordGetter>, Dictionary<IFormLinkGetter<IKeywordGetter>, ArmorValues>>> armorKeys = new Dictionary<IFormLinkGetter<IKeywordGetter>, Dictionary<IFormLinkGetter<IKeywordGetter>, Dictionary<IFormLinkGetter<IKeywordGetter>, ArmorValues>>>()
+        // Read-only dictionary to match armor materials, types and pieces to their corresponding stats.
+        private static readonly Dictionary<IFormLinkGetter<IKeywordGetter>, Dictionary<IFormLinkGetter<IKeywordGetter>, Dictionary<IFormLinkGetter<IKeywordGetter>, ArmorValues>>> armorKeys = new()
         {
             {
                 Skyrim.Keyword.ArmorMaterialDaedric, new Dictionary<IFormLinkGetter<IKeywordGetter>, Dictionary<IFormLinkGetter<IKeywordGetter>, ArmorValues>>()
@@ -635,6 +630,7 @@ namespace TrueUnleveledSkyrim.Patch
             }
         };
 
+
         // Rounds to .5 and then to the next whole number.
         private static double RoundWithHalf(double value)
         {
@@ -645,18 +641,20 @@ namespace TrueUnleveledSkyrim.Patch
         private static bool PatchWeaponValues(Weapon weaponEntry)
         {
             if (weaponEntry.Keywords is null || weaponEntry.BasicStats is null || weaponEntry.Data is null || weaponEntry.Critical is null) return false;
-            if (Patcher.ModSettings.Value.ItemAdjustments.Options.SkipArtifacts && weaponEntry.Keywords.Contains(Skyrim.Keyword.DaedricArtifact)) return false;
-            if (Patcher.ModSettings.Value.ItemAdjustments.Options.SkipUniques && weaponEntry.Keywords.Contains(Skyrim.Keyword.MagicDisallowEnchanting)) return false;
+            if (Patcher.ModSettings.Value.Rebalance.SkipArtifacts && weaponEntry.Keywords.Contains(Skyrim.Keyword.DaedricArtifact)) return false;
+            if (Patcher.ModSettings.Value.Rebalance.SkipUniques && weaponEntry.Keywords.Contains(Skyrim.Keyword.MagicDisallowEnchanting)) return false;
 
             bool wasChanged = false;
-            foreach (IFormLinkGetter<IKeywordGetter> weaponKeyword in weaponEntry.Keywords)
+            foreach (IFormLinkGetter<IKeywordGetter> materialKeyword in weaponEntry.Keywords)
             {
                 if (wasChanged) break;
-                if (!weaponKeys.TryGetValue(weaponKeyword, out var materialDict)) continue;
+                if (!weaponKeys.TryGetValue(materialKeyword, out var typeDict))
+                    continue;
 
-                foreach (IFormLinkGetter<IKeywordGetter> weaponKeyword2 in weaponEntry.Keywords)
+                foreach (IFormLinkGetter<IKeywordGetter> typeKeyword in weaponEntry.Keywords)
                 {
-                    if (!materialDict.TryGetValue(weaponKeyword2, out var weaponStats)) continue;
+                    if (!typeDict.TryGetValue(typeKeyword, out var weaponStats))
+                        continue;
                     
                     weaponEntry.BasicStats.Damage = (ushort)Math.Round(weaponStats.WeaponDamageMod * (weaponEntry.BasicStats.Damage / weaponStats.WeaponDamage));
                     weaponEntry.BasicStats.Weight = (float)RoundWithHalf(weaponStats.WeaponWeightMod * (weaponEntry.BasicStats.Weight / weaponStats.WeaponWeight));
@@ -678,27 +676,29 @@ namespace TrueUnleveledSkyrim.Patch
         private static bool PatchArmorValues(Armor armorEntry)
         {
             if (armorEntry.Keywords is null) return false;
-            if (Patcher.ModSettings.Value.ItemAdjustments.Options.SkipArtifacts && armorEntry.Keywords.Contains(Skyrim.Keyword.DaedricArtifact)) return false;
-            if (Patcher.ModSettings.Value.ItemAdjustments.Options.SkipUniques && armorEntry.Keywords.Contains(Skyrim.Keyword.MagicDisallowEnchanting)) return false;
+            if (Patcher.ModSettings.Value.Rebalance.SkipArtifacts && armorEntry.Keywords.Contains(Skyrim.Keyword.DaedricArtifact)) return false;
+            if (Patcher.ModSettings.Value.Rebalance.SkipUniques && armorEntry.Keywords.Contains(Skyrim.Keyword.MagicDisallowEnchanting)) return false;
 
             bool wasChanged = false;
-            foreach(IFormLinkGetter<IKeywordGetter> armorKeyword in armorEntry.Keywords)
+            foreach(IFormLinkGetter<IKeywordGetter> materialKeyword in armorEntry.Keywords)
             {
                 if (wasChanged) break;
-                if (!armorKeys.TryGetValue(armorKeyword, out var materialDict)) continue;
+                if (!armorKeys.TryGetValue(materialKeyword, out var typeDict))
+                    continue;
 
                 Dictionary<IFormLinkGetter<IKeywordGetter>, ArmorValues>? weightDict;
                 bool isHeavy = (armorEntry.BodyTemplate?.ArmorType ?? ArmorType.Clothing) == ArmorType.HeavyArmor;
                 bool isLight = (armorEntry.BodyTemplate?.ArmorType ?? ArmorType.Clothing) == ArmorType.LightArmor;
                 if (isHeavy)
-                    materialDict.TryGetValue(Skyrim.Keyword.ArmorHeavy, out weightDict);
+                    typeDict.TryGetValue(Skyrim.Keyword.ArmorHeavy, out weightDict);
                 else if (isLight)
-                    materialDict.TryGetValue(Skyrim.Keyword.ArmorLight, out weightDict);
+                    typeDict.TryGetValue(Skyrim.Keyword.ArmorLight, out weightDict);
                 else continue;
 
                 foreach (IFormLinkGetter<IKeywordGetter> armorKeyword2 in armorEntry.Keywords)
                 {
-                    if (weightDict is null || !weightDict.TryGetValue(armorKeyword2, out var armorStats)) continue;
+                    if (weightDict is null || !weightDict.TryGetValue(armorKeyword2, out var armorStats))
+                        continue;
 
                     armorEntry.ArmorRating =    (float)RoundWithHalf(armorStats.ArmorValueMod * (armorEntry.ArmorRating / armorStats.ArmorValue));
                     armorEntry.Weight =         (float)RoundWithHalf(armorStats.ArmorWeightMod * (armorEntry.Weight / armorStats.ArmorWeight));
@@ -710,6 +710,11 @@ namespace TrueUnleveledSkyrim.Patch
             }
 
             return wasChanged;
+        }
+
+        private static void LoadBaseCache(IPatcherState<ISkyrimMod, ISkyrimModGetter> state)
+        {
+            BaseCache = LoadOrder.Import<ISkyrimModGetter>(state.DataFolderPath, Patcher.ModSettings.Value.Rebalance.BaseStatPlugins, Mutagen.Bethesda.GameRelease.SkyrimSE).ListedOrder.ToImmutableLinkCache();
         }
 
         // Main function to change all item stats to new morrowloot-inspired values.
@@ -732,13 +737,10 @@ namespace TrueUnleveledSkyrim.Patch
                     Console.WriteLine("Processed " + processedRecords + " armors.");
 
                 if(wasChanged)
-                {
                     state.PatchMod.Armors.Set(armorCopy);
-                    // Console.WriteLine("Patched armor: " + armorCopy.EditorID);
-                }
             }
 
-            Console.WriteLine("Processed " + processedRecords + " armors in total.");
+            Console.WriteLine("Processed " + processedRecords + " armors in total.\n");
             processedRecords = 0;
 
             foreach (IWeaponGetter? weaponGetter in state.LoadOrder.PriorityOrder.Weapon().WinningOverrides())
@@ -753,12 +755,10 @@ namespace TrueUnleveledSkyrim.Patch
                     Console.WriteLine("Processed " + processedRecords + " weapons.");
 
                 if (wasChanged)
-                {
                     state.PatchMod.Weapons.Set(weaponCopy);
-                }
             }
 
-            if(Patcher.ModSettings.Value.ItemAdjustments.Options.TemperingDebuff)
+            if(Patcher.ModSettings.Value.Rebalance.TemperingDebuff)
             {
                 var armorGMST = state.PatchMod.GameSettings.AddNewFloat();
                 var weaponGMST = state.PatchMod.GameSettings.AddNewFloat();
@@ -766,7 +766,7 @@ namespace TrueUnleveledSkyrim.Patch
                 armorGMST.Data = new float?(6); weaponGMST.Data = new float?(6);
             }
 
-            Console.WriteLine("Processed " + processedRecords + " weapons in total.");
+            Console.WriteLine("Processed " + processedRecords + " weapons in total.\n");
         }
     }
 }

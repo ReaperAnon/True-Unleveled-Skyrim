@@ -1,8 +1,13 @@
 {
-  "Nickname": "True Unleveled Skyrim",
+  "Nickname": "TrueUnleveledSkyrim",
   "Visibility": "Visible",
-  "OneLineDescription": "A large collection of features to unlevel your game like never before with a lot of compatibility to boot.",
-  "LongDescription": "A large collection of features to unlevel your game like never before with a lot of compatibility to boot.",
+  "OneLineDescription": "Comprehensive patcher for rebalancing the game world, npcs, items, leveled lists and more.",
+  "LongDescription": "A comprehensive patcher (or mod generator would be more apt) meant to unlevel the game and provide a Requiem and/or Morrowloot-style experience while being highly compatible and taking into account every little piece of your modlist, be that NPC overhauls, enemy overhauls, additional enemy or creature mods, new armors and weapons or perk overhauls.\r\n\r\nFor a more comprehensive explanation of what it does exactly and how to tweak the options, refer to the description on the GitHub page.\r\nhttps://github.com/ReaperAnon/True-Unleveled-Skyrim",
   "PreferredAutoVersioning": "Default",
-  "RequiredMods": []
+  "RequiredMods": [],
+  "TargetedReleases": [
+    "SkyrimSE",
+    "SkyrimVR",
+    "SkyrimSEGog"
+  ]
 }

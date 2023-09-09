@@ -22,52 +22,50 @@ namespace TrueUnleveledSkyrim.Patch
         // Determines if a given leveled list holds artifacts or not based on the predefined EDID snippets in artifactKeys.json.
         private static bool IsArtifactList(LeveledItem itemList)
         {
-            if (itemList.EditorID is null) return false;
-            foreach (string? artifactKey in artifactKeys!.Keys)
-            {
-                if (itemList.EditorID.Contains(artifactKey, StringComparison.OrdinalIgnoreCase))
-                    return true;
-            }
+            if (itemList.EditorID is null)
+                return false;
 
-            return false;
+            return artifactKeys!.Keys.Any(key => itemList.EditorID.Contains(key, StringComparison.OrdinalIgnoreCase));
         }
 
         // Checks if the given leveled list is an artifact list by checking if all the item names in the list are the same.
         private static bool IsArtifactList(LeveledItem itemList, ILinkCache linkCache)
         {
+            // If defined in the artifactKeys.json list.
+            if (IsArtifactList(itemList))
+                return true;
+
             int entryCount = 0;
             string? itemName = null;
-
-            foreach(LeveledItemEntry? itemEntry in itemList.Entries.EmptyIfNull())
+            foreach (LeveledItemEntry? itemEntry in itemList.Entries.EmptyIfNull())
             {
-                if (itemEntry.Data is null) return false;
-                if (!itemEntry.Data.Reference.TryResolve(linkCache, out var resolvedItem)) return false;
-                
-                if(resolvedItem is INamedGetter namedItem)
+                if (itemEntry.Data is null)
+                    return false;
+
+                if (!itemEntry.Data.Reference.TryResolve(linkCache, out var resolvedItem))
+                    return false;
+
+                if (resolvedItem is not INamedGetter namedItem)
+                    continue;
+
+                if (itemName == namedItem.Name)
                 {
-                    if (itemName == namedItem.Name)
-                    {
-                        ++entryCount;
-                    }
-                    else if (itemName.IsNullOrEmpty())
-                    {
-                        itemName = namedItem.Name;
-                        ++entryCount;
-                    }
+                    ++entryCount;
+                }
+                else if (itemName is null)
+                {
+                    itemName = namedItem.Name;
+                    ++entryCount;
                 }
             }
 
-            // If it's not an artifact, consult the artifactKeys.json list to double check.
-            bool isArtifact = entryCount == (itemList.Entries?.Count ?? 0);
-            if (!isArtifact) isArtifact |= IsArtifactList(itemList);
-
-            return isArtifact;
+            return entryCount == (itemList.Entries?.Count ?? 0);
         }
 
         // Removes every item from a list other than the highest level one.
         private static bool CullArtifactList(LeveledItem itemList)
         {
-            if (itemList.Entries is null || !Patcher.ModSettings.Value.Unleveling.Items.UnlevelArtifacts)
+            if (itemList.Entries is null || !Patcher.ModSettings.Value.Items.UnlevelArtifacts)
                 return false;
 
             bool wasChanged = false;
@@ -91,8 +89,8 @@ namespace TrueUnleveledSkyrim.Patch
             if (itemData is null)
                 return false;
 
-            int maxLevel = Patcher.ModSettings.Value.Unleveling.Items.MaxItemLevel;
-            int minLevel = Patcher.ModSettings.Value.Unleveling.Items.MinItemLevel;
+            int maxLevel = Patcher.ModSettings.Value.Items.MaxItemLevel;
+            int minLevel = Patcher.ModSettings.Value.Items.MinItemLevel;
             bool shouldRemove = itemData.Level > maxLevel && maxLevel != 0 || itemData.Level < minLevel;
 
             if(itemData.Level == maxLevel && !shouldRemove)
@@ -142,8 +140,8 @@ namespace TrueUnleveledSkyrim.Patch
             foreach (var entry in itemList.Entries.EmptyIfNull())
             {
                 if (entry.Data is null) continue;
-                if (entry.Data.Level < lvlMin)  lvlMin = entry.Data.Level;
-                if (entry.Data.Level > lvlMax)  lvlMax = entry.Data.Level;
+                if (entry.Data.Level < lvlMin) lvlMin = entry.Data.Level;
+                if (entry.Data.Level > lvlMax) lvlMax = entry.Data.Level;
             }
         }
 
@@ -167,11 +165,10 @@ namespace TrueUnleveledSkyrim.Patch
 
         private static void ChangeNewLVLIEntries(LeveledItem itemList, IPatcherState<ISkyrimMod, ISkyrimModGetter> state, ILinkCache linkCache)
         {
-            bool isStrongEntry = false;
             bool isWeakEntry = itemList.EditorID!.Contains(TUSConstants.WeakPostfix, StringComparison.OrdinalIgnoreCase);
-            if (!isWeakEntry)
-                isStrongEntry = itemList.EditorID!.Contains(TUSConstants.StrongPostfix, StringComparison.OrdinalIgnoreCase);
-            if (!isWeakEntry && !isStrongEntry) return;
+            bool isStrongEntry = !isWeakEntry && itemList.EditorID!.Contains(TUSConstants.StrongPostfix, StringComparison.OrdinalIgnoreCase);
+            if (!isWeakEntry && !isStrongEntry)
+                return;
 
             ILinkCache newCache = state.PatchMod.ToImmutableLinkCache();
 
@@ -184,7 +181,7 @@ namespace TrueUnleveledSkyrim.Patch
                 {
                     LeveledItem? newEntry = state.PatchMod.LeveledItems.Where(x => x.EditorID == lvliGetter.EditorID + usedPostfix).FirstOrDefault();
                     if(newEntry is not null)
-                        entry.Data.Reference = newEntry.AsLink();
+                        entry.Data.Reference = newEntry.ToLink();
                 }
             }
         }
@@ -194,7 +191,7 @@ namespace TrueUnleveledSkyrim.Patch
         {
             artifactKeys = JsonHelper.LoadConfig<ArtifactKeys>(TUSConstants.ArtifactKeysPath);
             excludedLVLI = JsonHelper.LoadConfig<ExcludedLVLI>(TUSConstants.ExcludedLVLIPath);
-            bool allowEmptyLists = Patcher.ModSettings.Value.Unleveling.Items.AllowEmptyLists;
+            bool allowEmptyLists = Patcher.ModSettings.Value.Items.AllowEmptyLists;
 
             uint processedRecords = 0;
             foreach(var lvlItemGetter in state.LoadOrder.PriorityOrder.LeveledItem().WinningOverrides().ToArray())
@@ -202,56 +199,40 @@ namespace TrueUnleveledSkyrim.Patch
                 bool wasChanged = false;
                 LeveledItem listCopy = lvlItemGetter.DeepCopy();
 
-                if (!IsArtifactList(listCopy, Patcher.LinkCache))
+                if (IsArtifactList(listCopy, Patcher.LinkCache))
                 {
-                    int lvlMin, lvlMax;
+                    wasChanged |= CullArtifactList(listCopy);
+                }
+                else
+                {
+                    if (listCopy.EditorID is not null &&
+                        excludedLVLI.Keys.Any(key => listCopy.EditorID.Contains(key, StringComparison.OrdinalIgnoreCase)) && !excludedLVLI.ForbiddenKeys.Any(key => listCopy.EditorID.Contains(key, StringComparison.OrdinalIgnoreCase)))
+                        continue;
 
-                    bool cullList = true;
-                    foreach(string? lvliKey in excludedLVLI.Keys)
+                    wasChanged |= RemoveRareItems(listCopy, Patcher.LinkCache);
+                    GetLevelBoundaries(listCopy, out var lvlMin, out var lvlMax);
+                    if (lvlMin != short.MaxValue && lvlMax != -1 && lvlMin != lvlMax)
                     {
-                        if(listCopy.EditorID?.Contains(lvliKey, StringComparison.OrdinalIgnoreCase) ?? false)
-                        {
-                            cullList = false;
-                            foreach(string? forbiddenKey in excludedLVLI.ForbiddenKeys)
-                            {
-                                if(listCopy.EditorID?.Contains(lvliKey, StringComparison.OrdinalIgnoreCase) ?? false)
-                                {
-                                    cullList = true;
-                                    break;
-                                }
-                            }
-                            break;
-                        }
-                    }
+                        var weakCopy = new LeveledItem(state.PatchMod);
+                        var strongCopy = new LeveledItem(state.PatchMod);
+                        weakCopy.DeepCopyIn(listCopy);
+                        strongCopy.DeepCopyIn(listCopy);
+                        weakCopy.EditorID += TUSConstants.WeakPostfix;
+                        strongCopy.EditorID += TUSConstants.StrongPostfix;
 
-                    if(cullList)
-                    {
-                        wasChanged |= RemoveRareItems(listCopy, Patcher.LinkCache);
-                        GetLevelBoundaries(listCopy, out lvlMin, out lvlMax);
-                        if (lvlMin != Int16.MaxValue && lvlMax != -1 && lvlMin != lvlMax)
-                        {
-                            LeveledItem weakCopy = new LeveledItem(state.PatchMod);
-                            LeveledItem strongCopy = new LeveledItem(state.PatchMod);
-                            weakCopy.DeepCopyIn(listCopy);
-                            strongCopy.DeepCopyIn(listCopy);
-                            weakCopy.EditorID += TUSConstants.WeakPostfix;
-                            strongCopy.EditorID += TUSConstants.StrongPostfix;
+                        int lvlMed = (int)Math.Round((lvlMin + lvlMax) * 0.465);
+                        RemoveItemsWithRange(weakCopy, lvlMed + 1, lvlMax);
+                        RemoveItemsWithRange(strongCopy, lvlMin, lvlMed - 1);
 
-                            int lvlMed = (int)Math.Round((lvlMin + lvlMax) * 0.465);
-                            RemoveItemsWithRange(weakCopy, lvlMed + 1, lvlMax);
-                            RemoveItemsWithRange(strongCopy, lvlMin, lvlMed - 1);
+                        UnlevelList(weakCopy);
+                        UnlevelList(strongCopy);
 
-                            UnlevelList(weakCopy);
-                            UnlevelList(strongCopy);
-
-                            if (weakCopy.Entries is not null && weakCopy.Entries.Any())
-                                state.PatchMod.LeveledItems.Set(weakCopy);
-                            if (strongCopy.Entries is not null && strongCopy.Entries.Any())
-                                state.PatchMod.LeveledItems.Set(strongCopy);
-                        }
+                        if (weakCopy.Entries is not null && weakCopy.Entries.Any())
+                            state.PatchMod.LeveledItems.Set(weakCopy);
+                        if (strongCopy.Entries is not null && strongCopy.Entries.Any())
+                            state.PatchMod.LeveledItems.Set(strongCopy);
                     }
                 }
-                else wasChanged |= CullArtifactList(listCopy);
 
                 if (!allowEmptyLists && (listCopy.Entries is null || !listCopy.Entries.Any()))
                 {
@@ -273,7 +254,7 @@ namespace TrueUnleveledSkyrim.Patch
             foreach(var entry in state.PatchMod.LeveledItems)
                 ChangeNewLVLIEntries(entry, state, Patcher.LinkCache);
 
-            Console.WriteLine("Processed " + processedRecords + " leveled item lists in total.");
+            Console.WriteLine("Processed " + processedRecords + " leveled item lists in total.\n");
         }
     }
 }

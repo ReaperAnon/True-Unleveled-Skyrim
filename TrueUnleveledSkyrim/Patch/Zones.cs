@@ -7,9 +7,9 @@ using Mutagen.Bethesda.Skyrim;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.FormKeys.SkyrimSE;
+using Mutagen.Bethesda.Plugins.Order;
 
 using TrueUnleveledSkyrim.Config;
-
 
 namespace TrueUnleveledSkyrim.Patch
 {
@@ -24,7 +24,7 @@ namespace TrueUnleveledSkyrim.Patch
             if(zoneDefinition.EnableCombatBoundary is not null)
                 encZone.Flags.SetFlag(EncounterZone.Flag.DisableCombatBoundary, !(bool)zoneDefinition.EnableCombatBoundary);
 
-            if (Patcher.ModSettings.Value.Unleveling.Zones.StaticZoneLevels)
+            if (Patcher.ModSettings.Value.Zones.StaticZoneLevels)
             {
                 encZone.MinLevel = (sbyte)Patcher.Randomizer.Next(zoneDefinition.MinLevel, zoneDefinition.MaxLevel);
                 encZone.MaxLevel = encZone.MinLevel;
@@ -46,32 +46,21 @@ namespace TrueUnleveledSkyrim.Patch
 
         private static bool PatchZonesByKeyword(EncounterZone encZone, ILinkCache linkCache)
         {
-            if (!encZone.Location.TryResolve<ILocationGetter>(linkCache, out ILocationGetter? resolvedLocation)) return false;
+            if (!encZone.Location.TryResolve<ILocationGetter>(linkCache, out ILocationGetter? resolvedLocation))
+                return false;
 
             for (int i = ZonesByKeyword!.Zones.Count - 1; i >= 0; i--)
             {
                 ZoneEntry? zoneDefinition = ZonesByKeyword.Zones[i];
                 foreach (var keywordEntry in resolvedLocation.Keywords.EmptyIfNull())
                 {
-                    if (!keywordEntry.TryResolve<IKeywordGetter>(linkCache, out IKeywordGetter? resolvedKeyword)) continue;
-                    foreach (string? keyEntry in zoneDefinition.Keys)
-                    {
-                        bool willChange = false;
-                        if (resolvedKeyword.EditorID is not null && resolvedKeyword.EditorID.Contains(keyEntry, StringComparison.OrdinalIgnoreCase))
-                        {
-                            willChange = true;
-                            foreach(string? forbiddenKey in zoneDefinition.ForbiddenKeys)
-                            {
-                                if (resolvedKeyword.EditorID.Contains(forbiddenKey))
-                                    willChange = false;
-                            }
+                    if (!keywordEntry.TryResolve<IKeywordGetter>(linkCache, out IKeywordGetter? resolvedKeyword) || resolvedKeyword.EditorID is null)
+                        continue;
 
-                            if(willChange)
-                            {
-                                UnlevelZone(encZone, zoneDefinition);
-                                return true;
-                            }
-                        }
+                    if (zoneDefinition.Keys.Any(key => resolvedKeyword.EditorID.Equals(key, StringComparison.OrdinalIgnoreCase)) && !zoneDefinition.ForbiddenKeys.Any(key => resolvedKeyword.EditorID.Equals(key, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        UnlevelZone(encZone, zoneDefinition);
+                        return true;
                     }
                 }
             }
@@ -81,26 +70,17 @@ namespace TrueUnleveledSkyrim.Patch
 
         private static bool PatchZonesByID(EncounterZone encZone)
         {
+            if (encZone.EditorID is null)
+                return false;
+
             for(int i = ZonesByID!.Zones.Count - 1; i >= 0; i--)
             {
                 ZoneEntry? zoneDefinition = ZonesByID.Zones[i];
-                foreach (string? idEntry in zoneDefinition.Keys)
-                {
-                    if (encZone.EditorID is not null && encZone.EditorID.Contains(idEntry, StringComparison.OrdinalIgnoreCase))
-                    {
-                        bool willChange = true;
-                        foreach (var forbiddenKey in zoneDefinition.ForbiddenKeys)
-                        {
-                            if (encZone.EditorID.Contains(forbiddenKey))
-                                willChange = false;
-                        }
 
-                        if (willChange)
-                        {
-                            UnlevelZone(encZone, zoneDefinition);
-                            return true;
-                        }
-                    }
+                if (zoneDefinition.Keys.Any(key => encZone.EditorID.Equals(key, StringComparison.OrdinalIgnoreCase)) && !zoneDefinition.ForbiddenKeys.Any(key => encZone.EditorID.Equals(key, StringComparison.OrdinalIgnoreCase)))
+                {
+                    UnlevelZone(encZone, zoneDefinition);
+                    return true;
                 }
             }
 
@@ -109,7 +89,7 @@ namespace TrueUnleveledSkyrim.Patch
 
         public static void PatchZones(IPatcherState<ISkyrimMod, ISkyrimModGetter> state)
         {
-            if(Patcher.ModSettings.Value.Unleveling.Zones.UseMorrowlootZoneBalance)
+            if (Patcher.ModSettings.Value.Zones.UseMorrowlootZoneBalance)
             {
                 ZonesByKeyword = JsonHelper.LoadConfig<ZoneList>(TUSConstants.ZoneTyesKeywordMLUPath);
                 ZonesByID = JsonHelper.LoadConfig<ZoneList>(TUSConstants.ZoneTyesEDIDMLUPath);
@@ -121,8 +101,13 @@ namespace TrueUnleveledSkyrim.Patch
             }
 
             uint processedRecords = 0;
-            foreach (IEncounterZoneGetter? zoneGetter in state.LoadOrder.PriorityOrder.EncounterZone().WinningOverrides())
+            var forbiddenCache = LoadOrder.Import<ISkyrimModGetter>(state.DataFolderPath, Patcher.ModSettings.Value.Zones.PluginFilter, GameRelease.SkyrimSE).ListedOrder.ToImmutableLinkCache();
+            foreach (var zoneGetter in state.LoadOrder.PriorityOrder.EncounterZone().WinningOverrides())
             {
+                // Skip encounter zones that can be found in the cache defined by the plugin filter list.
+                if (forbiddenCache.TryResolve(zoneGetter.ToLink(), out _))
+                    continue;
+
                 bool wasChanged = false;
                 EncounterZone zoneCopy = zoneGetter.DeepCopy();
 
@@ -138,12 +123,12 @@ namespace TrueUnleveledSkyrim.Patch
                 }
             }
 
-            GameSettingFloat? easyEnemyLvlMult = Skyrim.GameSetting.fLeveledActorMultEasy.TryResolve(Patcher.LinkCache)!.DeepCopy() as GameSettingFloat; easyEnemyLvlMult!.Data = new float?(Patcher.ModSettings.Value.Unleveling.Zones.EasySpawnLevelMult); state.PatchMod.GameSettings.Set(easyEnemyLvlMult!);
-            GameSettingFloat? mediumEnemyLvlMult = Skyrim.GameSetting.fLeveledActorMultMedium.TryResolve(Patcher.LinkCache)!.DeepCopy() as GameSettingFloat; mediumEnemyLvlMult!.Data = new float?(Patcher.ModSettings.Value.Unleveling.Zones.NormalSpawnLevelMult); state.PatchMod.GameSettings.Set(mediumEnemyLvlMult!);
-            GameSettingFloat? hardEnemyLvlMult = Skyrim.GameSetting.fLeveledActorMultHard.TryResolve(Patcher.LinkCache)!.DeepCopy() as GameSettingFloat; hardEnemyLvlMult!.Data = new float?(Patcher.ModSettings.Value.Unleveling.Zones.HardSpawnLevelMult); state.PatchMod.GameSettings.Set(hardEnemyLvlMult!);
-            GameSettingFloat? veryHardEnemyLvlMult = Skyrim.GameSetting.fLeveledActorMultVeryHard.TryResolve(Patcher.LinkCache)!.DeepCopy() as GameSettingFloat; veryHardEnemyLvlMult!.Data = new float?(Patcher.ModSettings.Value.Unleveling.Zones.VeryHardSpawnLevelMult); state.PatchMod.GameSettings.Set(veryHardEnemyLvlMult!);
+            GameSettingFloat? easyEnemyLvlMult = Skyrim.GameSetting.fLeveledActorMultEasy.TryResolve(Patcher.LinkCache)!.DeepCopy() as GameSettingFloat; easyEnemyLvlMult!.Data = new float?(Patcher.ModSettings.Value.Zones.EasySpawnLevelMult); state.PatchMod.GameSettings.Set(easyEnemyLvlMult!);
+            GameSettingFloat? mediumEnemyLvlMult = Skyrim.GameSetting.fLeveledActorMultMedium.TryResolve(Patcher.LinkCache)!.DeepCopy() as GameSettingFloat; mediumEnemyLvlMult!.Data = new float?(Patcher.ModSettings.Value.Zones.NormalSpawnLevelMult); state.PatchMod.GameSettings.Set(mediumEnemyLvlMult!);
+            GameSettingFloat? hardEnemyLvlMult = Skyrim.GameSetting.fLeveledActorMultHard.TryResolve(Patcher.LinkCache)!.DeepCopy() as GameSettingFloat; hardEnemyLvlMult!.Data = new float?(Patcher.ModSettings.Value.Zones.HardSpawnLevelMult); state.PatchMod.GameSettings.Set(hardEnemyLvlMult!);
+            GameSettingFloat? veryHardEnemyLvlMult = Skyrim.GameSetting.fLeveledActorMultVeryHard.TryResolve(Patcher.LinkCache)!.DeepCopy() as GameSettingFloat; veryHardEnemyLvlMult!.Data = new float?(Patcher.ModSettings.Value.Zones.VeryHardSpawnLevelMult); state.PatchMod.GameSettings.Set(veryHardEnemyLvlMult!);
 
-            Console.WriteLine("Processed " + processedRecords + " encounter zones in total.");
+            Console.WriteLine("Processed " + processedRecords + " encounter zones in total.\n");
         }
     }
 }

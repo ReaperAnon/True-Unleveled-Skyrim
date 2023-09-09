@@ -1,24 +1,30 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30330.147
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TrueUnleveledSkyrim", "TrueUnleveledSkyrim\TrueUnleveledSkyrim.csproj", "{8BA2E1B7-DD65-42B6-A780-17E4037A3C1B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
 		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{8BA2E1B7-DD65-42B6-A780-17E4037A3C1B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8BA2E1B7-DD65-42B6-A780-17E4037A3C1B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8BA2E1B7-DD65-42B6-A780-17E4037A3C1B}.Debug|x64.ActiveCfg = Debug|x64
+		{8BA2E1B7-DD65-42B6-A780-17E4037A3C1B}.Debug|x64.Build.0 = Debug|x64
 		{8BA2E1B7-DD65-42B6-A780-17E4037A3C1B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8BA2E1B7-DD65-42B6-A780-17E4037A3C1B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8BA2E1B7-DD65-42B6-A780-17E4037A3C1B}.Release|x64.ActiveCfg = Release|x64
+		{8BA2E1B7-DD65-42B6-A780-17E4037A3C1B}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {246E9FEA-0230-4009-A69F-7984BD817237}
+		SolutionGuid = {4A1E829B-CB0C-43EB-919D-F49EDFFCE153}
 	EndGlobalSection
 EndGlobal

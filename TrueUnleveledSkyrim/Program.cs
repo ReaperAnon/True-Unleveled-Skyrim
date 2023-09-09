@@ -14,8 +14,10 @@ namespace TrueUnleveledSkyrim
 {
     public class Patcher
     {
-        public static Random Randomizer = new();
+        public static readonly Random Randomizer = new();
+#pragma warning disable CA2211
         public static Lazy<TUSConfig> ModSettings = null!;
+#pragma warning restore CA2211
 
         public static ILinkCache LinkCache { get; set; } = null!;
 
@@ -33,23 +35,23 @@ namespace TrueUnleveledSkyrim
             LinkCache = state.LoadOrder.ListedOrder.ToImmutableLinkCache();
 
             TUSConstants.GetPaths(state);
-            if (ModSettings.Value.Unleveling.UnlevelItems)
+            if (ModSettings.Value.UnlevelItems)
             {
                 LeveledItemsPatcher.PatchLVLI(state);
                 OutfitsPatcher.PatchOutfits(state);
             }
 
-            if (ModSettings.Value.Unleveling.UnlevelNPCs)
+            if (ModSettings.Value.UnlevelNPCs)
             {
                 NPCsPatcher.PatchNPCs(state);
             }
 
-            if (ModSettings.Value.Unleveling.UnlevelZones)
+            if (ModSettings.Value.UnlevelZones)
             {
                 ZonesPatcher.PatchZones(state);
             }
 
-            if (ModSettings.Value.ItemAdjustments.MorrowlootifyItems)
+            if (ModSettings.Value.RebalanceEquipment)
             {
                 ItemsPatcher.PatchItems(state);
             }

@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-
+using Mutagen.Bethesda.Skyrim;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.WPF.Reflection.Attributes;
 
@@ -7,14 +7,6 @@ using Mutagen.Bethesda.WPF.Reflection.Attributes;
 namespace TrueUnleveledSkyrim.Config
 {
     public class TUSConfig
-    {
-        public TUSConfig_LeveledLists Unleveling { get; set; } = new TUSConfig_LeveledLists();
-
-
-        public TUSConfig_ItemAdjustments ItemAdjustments { get; set; } = new TUSConfig_ItemAdjustments();
-    }
-
-    public class TUSConfig_LeveledLists
     {
         [Tooltip("If enabled, Encounter Zones will be unleveled according to the specified settings.")]
         public bool UnlevelZones { get; set; } = true;
@@ -34,25 +26,22 @@ namespace TrueUnleveledSkyrim.Config
         public bool UnlevelItems { get; set; } = true;
 
         public TUSConfig_Items Items { get; set; } = new();
-    }
 
-    public class TUSConfig_ItemAdjustments
-    {
+
         [Tooltip("If enabled, changes item stats to match Morrowloot's vision. Glass, Ebony, Stalhrim, Dragon, Daedric, and unique items will be stronger.")]
-        public bool MorrowlootifyItems { get; set; } = true;
+        public bool RebalanceEquipment { get; set; } = true;
 
-
-        public TUSConfig_Morrowloot Options { get; set; } = new TUSConfig_Morrowloot();
+        public TUSConfig_Morrowloot Rebalance { get; set; } = new TUSConfig_Morrowloot();
     }
 
     public class TUSConfig_Items
     {
-        [Tooltip("The level from which items are purged from leveled lists. Setting it to 0 means there is no upper level limit.\nTiers (based on vanilla leveled lists):\n1 - Iron\n2 - Steel\n6 - Orcish\n12 - Dwarven\n19 - Elven\n27 - Glass\n36 - Ebony\n46 - Daedric")]
-        public int MaxItemLevel { get; set; } = 27;
-
-
         [Tooltip("The level below which items are purged from leveled lists. Setting it to 0 means there is no lower level limit.\nTiers (based on vanilla leveled lists):\n1 - Iron\n2 - Steel\n6 - Orcish\n12 - Dwarven\n19 - Elven\n27 - Glass\n36 - Ebony\n46 - Daedric")]
         public int MinItemLevel { get; set; } = 0;
+
+
+        [Tooltip("The level from which items are purged from leveled lists. Setting it to 0 means there is no upper level limit.\nTiers (based on vanilla leveled lists):\n1 - Iron\n2 - Steel\n6 - Orcish\n12 - Dwarven\n19 - Elven\n27 - Glass\n36 - Ebony\n46 - Daedric")]
+        public int MaxItemLevel { get; set; } = 27;
 
 
         [Tooltip("If enabled, artifact items will always have the highest level variant in the leveled list.")]
@@ -91,40 +80,44 @@ namespace TrueUnleveledSkyrim.Config
 
         [Tooltip("The level multiplier for very hard spawns in encounter zones. At default, very hard spawns will have a level that is 1.5x the level of the area itself. Vanilla value is 1.25.")]
         public float VeryHardSpawnLevelMult { get; set; } = 1.5f;
+
+
+        [Tooltip("Encounter zones that originate from any of the plugins in this list will not be modified. Useful if you don't want the patcher to change anything in the base game so you can use a mod line Arena instead.")]
+        public List<ModKey> PluginFilter { get; set; } = new();
     }
 
     public class TUSConfig_NPCs
     {
-        [Tooltip("If enabled, NPCs will have their previously assigned perks removed before getting new ones added. Only removes perks originating from vanilla data files, so mod-added abilities can function.")]
-        public bool RemoveOldPerks { get; set; } = true;
-
-
-        [Tooltip("If enabled, makes the Extra Damage perks NPCs get that just multiply their damage by several magnitudes do nothing instead. Optimal if you want to distribute perks and/or use a skill-based damage mod.")]
-        public bool DisableExtraDamagePerks { get; set; } = true;
-
-
-        [Tooltip("If enabled, followers will scale 1:1 with the player with their maximum level cap being at least as high as their static level would be. They will still get skills and perks distributed as if they had their static levels, if enabled.")]
+        [Tooltip("If enabled, followers will scale 1:1 with the player with their maximum level cap being as high as their static level would be. They will still get skills and perks distributed as if they had their static levels, if enabled.")]
         public bool ScalingFollowers { get; set; } = true;
 
 
-        [Tooltip("If enabled, any npcs marked as undead will not have perks distributed for them.")]
-        public bool NoUndeadPerks { get; set; } = false;
+        [Tooltip("If enabled, NPCs will have their classes rebuilt based on what equipment and spells they actually use, making the perks they get actually matter in gameplay. As a side note, it also fixes many issues, like several two handed draugr being assigned as archers.")]
+        public bool RebuildNPCClasses { get; set; } = true;
 
 
-        [Tooltip("If enabled, any npcs marked as vampires will not have perks distributed for them.")]
-        public bool NoVampirePerks { get; set; } = false;
+        [Tooltip("If enabled, NPCs will have their vanilla perks removed before getting any new ones. Only removes perks originating from vanilla data files, so mod-added abilities can function. Doesn't remove anything if perk distribution is not enabled above or if the NPC is filtered via the list below.")]
+        public bool RemoveVanillaPerks { get; set; } = true;
 
 
-        [Tooltip("The amount of perk points NPCs get per every level they have. Set to 0 to not grant them any perks. The perks are distributed according to their requirements.")]
+        [Tooltip("If enabled, makes the Extra Damage perks that bloat NPC damage do nothing instead. Optimal if you want to distribute perks and/or use a skill-based damage mod.")]
+        public bool DisableExtraDamagePerks { get; set; } = true;
+
+
+        [Tooltip("The amount of perk points NPCs get per every level they have. The distributed perks respect their skill level and prior perk requirements. Set to 0 to disable perk distribution.")]
         public float NPCPerksPerLevel { get; set; } = 1f;
 
 
-        [Tooltip("The amount of skillpoints NPCs get per every level they have. Set to 0 to not change NPC skill levels. The points are distributed among their skills based on their class and their major and minor skills. All of their skills start at 15, these are applied on top of that.")]
+        [Tooltip("The amount of skillpoints NPCs get per level they have. Set to 0 to not change NPC skill levels. The points are distributed among their skills based on their class and their major and minor skills. All of their skills start at 15, these are applied on top of that.")]
         public float NPCSkillsPerLevel { get; set; } = 9.5f;
 
 
         [Tooltip("The maximum level an NPC's skills can have. If increased, high level NPCs can have some skills above level 100.")]
         public byte NPCMaxSkillLevel { get; set; } = 100;
+
+
+        [Tooltip("NPCs that have any of the keywords on this list, either in their own entry or their race entry, will not have their perks modified in any way. Useful if you want to stop undead or vampires from getting perks distributed among them.")]
+        public List<FormLink<IKeywordGetter>> PerkDistributionFilter { get; set; } = new();
     }
 
     public class TUSConfig_Morrowloot
@@ -139,10 +132,6 @@ namespace TrueUnleveledSkyrim.Config
             "Dragonborn.esm",
             "Unofficial Skyrim Special Edition Patch.esp"
         };
-
-
-        /*[Tooltip("If enabled, nonexistent armor types like light daedric or ebony armors will have pre-made stats instead of them trying to be read from the supplied plugin list above.")]
-        public bool UsePrefabStats { get; set; } = true;**/
 
 
         [Tooltip("If enabled, skips stat adjusment on all items tagged as a \"Daedric Artifact\".")]

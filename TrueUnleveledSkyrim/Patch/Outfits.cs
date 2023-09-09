@@ -28,7 +28,7 @@ namespace TrueUnleveledSkyrim.Patch
                     if (newItem is not null)
                     {
                         wasChanged = true;
-                        outfit.Items[i] = newItem.AsLink();
+                        outfit.Items[i] = newItem.ToLink();
                     }
                 }
             }
@@ -53,6 +53,7 @@ namespace TrueUnleveledSkyrim.Patch
 
                 if (ReplaceLVLIEntries(weakCopy, state, Patcher.LinkCache, true))
                     state.PatchMod.Outfits.Set(weakCopy);
+
                 if (ReplaceLVLIEntries(strongCopy, state, Patcher.LinkCache, false))
                     state.PatchMod.Outfits.Set(strongCopy);
 
@@ -61,7 +62,7 @@ namespace TrueUnleveledSkyrim.Patch
                     Console.WriteLine("Processed " + processedRecords + " outfits.");
             }
 
-            Console.WriteLine("Processed " + processedRecords + " outfits in total.");
+            Console.WriteLine("Processed " + processedRecords + " outfits in total.\n");
         }
     }
 }

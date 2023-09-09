@@ -29,18 +29,18 @@ namespace TrueUnleveledSkyrim.Config
 
         public static void GetPaths(IPatcherState<ISkyrimMod, ISkyrimModGetter> state)
         {
-            ArtifactKeysPath = Path.Combine(state.ExtraSettingsDataPath, ArtifactKeysPath);
-            FollowersPath = Path.Combine(state.ExtraSettingsDataPath, FollowersPath);
-            ExcludedLVLIPath = Path.Combine(state.ExtraSettingsDataPath, ExcludedLVLIPath);
-            ExcludedNPCsPath = Path.Combine(state.ExtraSettingsDataPath, ExcludedNPCsPath);
-            ExcludedPerksPath = Path.Combine(state.ExtraSettingsDataPath, ExcludedPerksPath);
-            NPCEDIDPath = Path.Combine(state.ExtraSettingsDataPath, NPCEDIDPath);
-            NPCFactionPath = Path.Combine(state.ExtraSettingsDataPath, NPCFactionPath);
-            RaceModifiersPath = Path.Combine(state.ExtraSettingsDataPath, RaceModifiersPath);
-            ZoneTyesEDIDPath = Path.Combine(state.ExtraSettingsDataPath, ZoneTyesEDIDPath);
-            ZoneTyesEDIDMLUPath = Path.Combine(state.ExtraSettingsDataPath, ZoneTyesEDIDMLUPath);
-            ZoneTyesKeywordPath = Path.Combine(state.ExtraSettingsDataPath, ZoneTyesKeywordPath);
-            ZoneTyesKeywordMLUPath = Path.Combine(state.ExtraSettingsDataPath, ZoneTyesKeywordMLUPath);
+            ArtifactKeysPath = Path.Combine(state.ExtraSettingsDataPath!, ArtifactKeysPath);
+            FollowersPath = Path.Combine(state.ExtraSettingsDataPath!, FollowersPath);
+            ExcludedLVLIPath = Path.Combine(state.ExtraSettingsDataPath!, ExcludedLVLIPath);
+            ExcludedNPCsPath = Path.Combine(state.ExtraSettingsDataPath!, ExcludedNPCsPath);
+            ExcludedPerksPath = Path.Combine(state.ExtraSettingsDataPath!, ExcludedPerksPath);
+            NPCEDIDPath = Path.Combine(state.ExtraSettingsDataPath!, NPCEDIDPath);
+            NPCFactionPath = Path.Combine(state.ExtraSettingsDataPath!, NPCFactionPath);
+            RaceModifiersPath = Path.Combine(state.ExtraSettingsDataPath!, RaceModifiersPath);
+            ZoneTyesEDIDPath = Path.Combine(state.ExtraSettingsDataPath!, ZoneTyesEDIDPath);
+            ZoneTyesEDIDMLUPath = Path.Combine(state.ExtraSettingsDataPath!, ZoneTyesEDIDMLUPath);
+            ZoneTyesKeywordPath = Path.Combine(state.ExtraSettingsDataPath!, ZoneTyesKeywordPath);
+            ZoneTyesKeywordMLUPath = Path.Combine(state.ExtraSettingsDataPath!, ZoneTyesKeywordMLUPath);
         }
 
     }
