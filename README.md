@@ -5,7 +5,7 @@
 The mod can be found either by searching for True Unleveled Skyrim on the patcher list or added via the .synth file found [here](https://github.com/ReaperAnon/True-Unleveled-Skyrim/releases/tag/meta).
 
 # True Unleveled Skyrim
-An dynamically generated mod meant to unlevel the game and provide an old style RPG feel to Skyrim, similar to a Requiem and/or Morrowloot-style experience while being highly compatible and taking into account every little piece of your modlist, be that NPC overhauls, enemy overhauls, additional enemy or creature mods, new armors and weapons or perk overhauls.
+A dynamically generated mod meant to unlevel the game and provide an old school RPG feel to Skyrim, similar to a Requiem and/or Morrowloot-style experience, but while staying highly compatible and taking into account every little piece of your modlist, be that NPC overhauls, enemy overhauls, additional enemy or creature mods, new armors and weapons or perk overhauls.
 
 ## What it Does
 It changes Encounter Zones and sets their levels according to the supplied configuration files and the selected options. This can mean unleveling the world or simply creating a different and unique leveled world similar to the vanilla design. It's possible to have Nordic ruins with a minimum level of 10 and a maximum of 50 with a range of 30, resulting in leveled Nordic ruins from 10-40, 20-50 and everything in-between. It also makes them always adhere to their minimum and maximum defined levels without matching the player and changes the spawn level multipliers for different enemy difficulties to provide a more consistent challenge to what the Encounter Zone is supposed to offer.
