@@ -111,10 +111,10 @@ namespace TrueUnleveledSkyrim.Patch
                 bool isUnique = npc.Configuration.Flags.HasFlag(NpcConfiguration.Flag.Unique);
                 float lvlMult = (pcLevelMult.LevelMult <= 0) ? 1 : pcLevelMult.LevelMult;
 
-                int lvlMin = Math.Max((int)npc.Configuration.CalcMinLevel, 2);
+                int lvlMin = Math.Max((int)npc.Configuration.CalcMinLevel, 1);
                 int lvlMax = npc.Configuration.CalcMaxLevel <= 0 ? (isUnique ? 100 : 80) : npc.Configuration.CalcMaxLevel;
 
-                short finalLevel = (short)(Math.Round((lvlMin * lvlMult + lvlMax) / 2) * levelModMult + levelModAdd);
+                short finalLevel = (short)((Math.Round((lvlMin + lvlMax) / 2.0f) + lvlMin * lvlMult) * levelModMult + levelModAdd);
 
                 npc.Configuration.Level = new NpcLevel() { Level = finalLevel };
             }

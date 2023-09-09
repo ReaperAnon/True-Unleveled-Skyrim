@@ -1,48 +1,45 @@
 {
-  "Unleveling": {
-    "UnlevelZones": true,
-    "Zones": {
-      "UseMorrowlootZoneBalance": true,
-      "StaticZoneLevels": true,
-      "EasySpawnLevelMult": 0.75,
-      "NormalSpawnLevelMult": 1.0,
-      "HardSpawnLevelMult": 1.25,
-      "VeryHardSpawnLevelMult": 1.5
-    },
-    "UnlevelNPCs": true,
-    "NPCs": {
-      "RemoveOldPerks": true,
-      "DisableExtraDamagePerks": true,
-      "ScalingFollowers": true,
-      "NoUndeadPerks": true,
-      "NoVampirePerks": false,
-      "NPCPerksPerLevel": 1.0,
-      "NPCSkillsPerLevel": 9.5,
-      "NPCMaxSkillLevel": 100
-    },
-    "UnlevelItems": true,
-    "Items": {
-      "MaxItemLevel": 27,
-      "MinItemLevel": 0,
-      "UnlevelArtifacts": true,
-      "AllowEmptyLists": false,
-      "AllowMidTier": false
-    }
+  "UnlevelZones": true,
+  "Zones": {
+    "UseMorrowlootZoneBalance": true,
+    "StaticZoneLevels": true,
+    "EasySpawnLevelMult": 0.75,
+    "NormalSpawnLevelMult": 1.0,
+    "HardSpawnLevelMult": 1.25,
+    "VeryHardSpawnLevelMult": 1.5,
+    "PluginFilter": []
   },
-  "ItemAdjustments": {
-    "MorrowlootifyItems": true,
-    "Options": {
-      "BaseStatPlugins": [
-        "Skyrim.esm",
-        "Update.esm",
-        "Dawnguard.esm",
-        "HearthFires.esm",
-        "Dragonborn.esm",
-        "Unofficial Skyrim Special Edition Patch.esp"
-      ],
-      "SkipArtifacts": false,
-      "SkipUniques": false,
-      "TemperingDebuff": true
-    }
+  "UnlevelNPCs": true,
+  "NPCs": {
+    "ScalingFollowers": true,
+    "RebuildNPCClasses": true,
+    "RemoveVanillaPerks": true,
+    "DisableExtraDamagePerks": true,
+    "NPCPerksPerLevel": 1.0,
+    "NPCSkillsPerLevel": 9.5,
+    "NPCMaxSkillLevel": 100,
+    "PerkDistributionFilter": []
+  },
+  "UnlevelItems": true,
+  "Items": {
+    "MinItemLevel": 0,
+    "MaxItemLevel": 27,
+    "UnlevelArtifacts": true,
+    "AllowEmptyLists": false,
+    "AllowMidTier": false
+  },
+  "RebalanceEquipment": true,
+  "Rebalance": {
+    "BaseStatPlugins": [
+      "Skyrim.esm",
+      "Update.esm",
+      "Dawnguard.esm",
+      "HearthFires.esm",
+      "Dragonborn.esm",
+      "Unofficial Skyrim Special Edition Patch.esp"
+    ],
+    "SkipArtifacts": false,
+    "SkipUniques": false,
+    "TemperingDebuff": true
   }
 }
