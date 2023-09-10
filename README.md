@@ -4,6 +4,9 @@
 
 The mod can be found either by searching for True Unleveled Skyrim on the patcher list or added via the .synth file found [here](https://github.com/ReaperAnon/True-Unleveled-Skyrim/releases/tag/meta).
 
+### Consider donating if you enjoy my work:
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/A0A6P3CRK)
+
 # True Unleveled Skyrim
 A dynamically generated mod meant to unlevel the game and provide an old school RPG feel to Skyrim, similar to a Requiem and/or Morrowloot-style experience, but while staying highly compatible and taking into account every little piece of your modlist, be that NPC overhauls, enemy overhauls, additional enemy or creature mods, new armors and weapons or perk overhauls.
 
