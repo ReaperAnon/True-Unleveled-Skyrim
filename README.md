@@ -1,4 +1,4 @@
-![Header](https://i.imgur.com/Adr9uVh.jpg)
+![Header](https://i.imgur.com/95p58nB.png)
 ### [Synthesis Install](https://github.com/Mutagen-Modding/Synthesis/wiki/Installation)
 ### [How to Use](https://github.com/Mutagen-Modding/Synthesis/wiki/Typical-Usage#adding-patchers)
 
