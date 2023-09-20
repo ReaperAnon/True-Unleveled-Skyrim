@@ -714,7 +714,7 @@ namespace TrueUnleveledSkyrim.Patch
 
         private static void LoadBaseCache(IPatcherState<ISkyrimMod, ISkyrimModGetter> state)
         {
-            BaseCache = LoadOrder.Import<ISkyrimModGetter>(state.DataFolderPath, Patcher.ModSettings.Value.Rebalance.BaseStatPlugins, Mutagen.Bethesda.GameRelease.SkyrimSE).ListedOrder.ToImmutableLinkCache();
+            BaseCache = LoadOrder.Import<ISkyrimModGetter>(state.DataFolderPath, Patcher.ModSettings.Value.Rebalance.BaseStatPlugins, Mutagen.Bethesda.GameRelease.SkyrimSE).PriorityOrder.ToImmutableLinkCache();
         }
 
         // Main function to change all item stats to new morrowloot-inspired values.

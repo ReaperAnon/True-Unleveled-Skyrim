@@ -8,7 +8,7 @@ using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
 
 using TrueUnleveledSkyrim.Config;
-
+using System.Collections.Immutable;
 
 namespace TrueUnleveledSkyrim.Patch
 {
@@ -40,7 +40,8 @@ namespace TrueUnleveledSkyrim.Patch
         public static void PatchOutfits(IPatcherState<ISkyrimMod, ISkyrimModGetter> state)
         {
             uint processedRecords = 0;
-            foreach (IOutfitGetter? outfitGetter in state.LoadOrder.PriorityOrder.Outfit().WinningOverrides().ToArray())
+            var staticList = state.LoadOrder.PriorityOrder.Outfit().WinningOverrides().ToImmutableList();
+            foreach (IOutfitGetter? outfitGetter in staticList)
             {
                 if (outfitGetter.Items is null) continue;
 

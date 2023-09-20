@@ -101,7 +101,7 @@ namespace TrueUnleveledSkyrim.Patch
             }
 
             uint processedRecords = 0;
-            var forbiddenCache = LoadOrder.Import<ISkyrimModGetter>(state.DataFolderPath, Patcher.ModSettings.Value.Zones.PluginFilter, GameRelease.SkyrimSE).ListedOrder.ToImmutableLinkCache();
+            var forbiddenCache = LoadOrder.Import<ISkyrimModGetter>(state.DataFolderPath, Patcher.ModSettings.Value.Zones.PluginFilter, GameRelease.SkyrimSE).PriorityOrder.ToImmutableLinkCache();
             foreach (var zoneGetter in state.LoadOrder.PriorityOrder.EncounterZone().WinningOverrides())
             {
                 // Skip encounter zones that can be found in the cache defined by the plugin filter list.

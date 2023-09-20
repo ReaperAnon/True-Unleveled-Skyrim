@@ -784,7 +784,7 @@ namespace TrueUnleveledSkyrim.Patch
             raceModifiers = JsonHelper.LoadConfig<RaceModifiers>(TUSConstants.RaceModifiersPath);
             
             uint processedRecords = 0;
-            var vanillaCache = LoadOrder.Import<ISkyrimModGetter>(state.DataFolderPath, new List<ModKey>() { Skyrim.ModKey, Dawnguard.ModKey, Dragonborn.ModKey }, GameRelease.SkyrimSE).ListedOrder.ToImmutableLinkCache();
+            var vanillaCache = LoadOrder.Import<ISkyrimModGetter>(state.DataFolderPath, new List<ModKey>() { Skyrim.ModKey, Dawnguard.ModKey, Dragonborn.ModKey }, GameRelease.SkyrimSE).PriorityOrder.ToImmutableLinkCache();
             foreach (INpcGetter? npcGetter in state.LoadOrder.PriorityOrder.Npc().WinningOverrides())
             {
                 if (npcGetter.EditorID is null)

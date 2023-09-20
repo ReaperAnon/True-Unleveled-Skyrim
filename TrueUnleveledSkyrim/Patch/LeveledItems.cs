@@ -10,7 +10,7 @@ using Mutagen.Bethesda.Plugins.Aspects;
 using Mutagen.Bethesda.Plugins.Records;
 
 using TrueUnleveledSkyrim.Config;
-
+using System.Collections.Immutable;
 
 namespace TrueUnleveledSkyrim.Patch
 {
@@ -170,8 +170,6 @@ namespace TrueUnleveledSkyrim.Patch
             if (!isWeakEntry && !isStrongEntry)
                 return;
 
-            ILinkCache newCache = state.PatchMod.ToImmutableLinkCache();
-
             string usedPostfix = isWeakEntry ? TUSConstants.WeakPostfix : TUSConstants.StrongPostfix;
             foreach(LeveledItemEntry entry in itemList.Entries.EmptyIfNull())
             {
@@ -194,7 +192,8 @@ namespace TrueUnleveledSkyrim.Patch
             bool allowEmptyLists = Patcher.ModSettings.Value.Items.AllowEmptyLists;
 
             uint processedRecords = 0;
-            foreach(var lvlItemGetter in state.LoadOrder.PriorityOrder.LeveledItem().WinningOverrides().ToArray())
+            var staticList = state.LoadOrder.PriorityOrder.LeveledItem().WinningOverrides().ToImmutableList();
+            foreach (var lvlItemGetter in staticList)
             {
                 bool wasChanged = false;
                 LeveledItem listCopy = lvlItemGetter.DeepCopy();
