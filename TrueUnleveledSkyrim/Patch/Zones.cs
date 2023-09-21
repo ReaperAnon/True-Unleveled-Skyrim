@@ -1,5 +1,3 @@
-using System;
-
 using Noggog;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Synthesis;

@@ -1,7 +1,3 @@
-using System;
-using System.Linq;
-using System.Collections.Generic;
-
 using Noggog;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Synthesis;
@@ -13,8 +9,6 @@ using Mutagen.Bethesda.FormKeys.SkyrimSE;
 
 using TrueUnleveledSkyrim.Config;
 using Mutagen.Bethesda.Plugins.Order;
-using System.Reflection.Metadata.Ecma335;
-using Mutagen.Bethesda.Plugins.Binary.Headers;
 
 namespace TrueUnleveledSkyrim.Patch
 {
@@ -459,7 +453,14 @@ namespace TrueUnleveledSkyrim.Patch
             return true;
         }
 
-        private static void GetItemSkillWeights(IItemGetter itemGetter, ref IDictionary<Skill, float> skillWeights, ILinkCache linkCache, float divisor = 1)
+        /// <summary>
+        /// Processes the leaves of the leveled item lists and manages the skill weights dictionary.
+        /// </summary>
+        /// <param name="itemGetter"></param>
+        /// <param name="skillWeights"></param>
+        /// <param name="linkCache"></param>
+        /// <param name="divisor"></param>
+        private static void GetItemSkillWeights(IItemGetter itemGetter, IDictionary<Skill, float> skillWeights, float divisor = 1)
         {
             // Add to weights when desired items are found.
             if (itemGetter is IWeaponGetter weaponGetter)
@@ -468,7 +469,6 @@ namespace TrueUnleveledSkyrim.Patch
                     return;
 
                 skillWeights[(Skill)weaponGetter.Data.Skill] += 1 / divisor;
-                return;
             }
             else if (itemGetter is IArmorGetter armorGetter)
             {
@@ -479,27 +479,49 @@ namespace TrueUnleveledSkyrim.Patch
                     skillWeights[Skill.HeavyArmor] += 1 / divisor;
                 else if (armorGetter.HasKeyword(Skyrim.Keyword.ArmorLight))
                     skillWeights[Skill.LightArmor] += 1 / divisor;
-
-                return;
-            }
-
-            // Go through the leveled list tree.
-            if (itemGetter is ILeveledItemGetter leveledItemGetter)
-            {
-                foreach (var itemEntry in leveledItemGetter.Entries.EmptyIfNull())
-                {
-                    if (itemEntry.Data is null || !itemEntry.Data.Reference.TryResolve(linkCache, out var entryGetter))
-                        continue;
-
-                    GetItemSkillWeights(entryGetter, ref skillWeights, linkCache, divisor);
-                }
             }
         }
 
-        private static void GetItemSkillWeights(IOutfitTargetGetter outfitTargetGetter, ref IDictionary<Skill, float> skillWeights, ILinkCache linkCache)
+        /// <summary>
+        /// Traverses the leveled item lists and calls the function managing the skill weights when a leaf is found.
+        /// </summary>
+        /// <param name="lvliGetter"></param>
+        /// <param name="skillWeights"></param>
+        /// <param name="linkCache"></param>
+        private static void GetItemSkillWeights(ILeveledItemGetter lvliGetter, IDictionary<Skill, float> skillWeights, ILinkCache linkCache, float divisor = 1)
         {
+            List<ILeveledItemEntryGetter> nodes = lvliGetter.Entries?.ToList() ?? new();
+            while (nodes.Any())
+            {
+                var node = nodes.Last();
+                nodes.RemoveAt(nodes.Count - 1);
+                if (node.Data is null || !node.Data.Reference.TryResolve(linkCache, out var entryGetter))
+                    continue;
+
+                if (entryGetter is ILeveledItemGetter lvliNode)
+                {
+                    foreach (var child in lvliNode.Entries.EmptyIfNull())
+                        nodes.Add(child);
+                }
+                else GetItemSkillWeights(entryGetter, skillWeights, divisor);
+            }
+        }
+
+        /// <summary>
+        /// Processes outfits, manages the skill weights if an outfit contains an armor, otherwise calls the leveled list traversal function.
+        /// </summary>
+        /// <param name="outfitTargetGetter"></param>
+        /// <param name="skillWeights"></param>
+        /// <param name="linkCache"></param>
+        private static void GetItemSkillWeights(IOutfitTargetGetter outfitTargetGetter, IDictionary<Skill, float> skillWeights, ILinkCache linkCache)
+        {
+            // Go through the leveled list tree.
+            if (outfitTargetGetter is ILeveledItemGetter leveledItemGetter)
+            {
+                GetItemSkillWeights(leveledItemGetter, skillWeights, linkCache);
+            }
             // Add to weights when desired items are found.
-            if (outfitTargetGetter is IArmorGetter armorGetter)
+            else if (outfitTargetGetter is IArmorGetter armorGetter)
             {
                 if (armorGetter.HasKeyword(Skyrim.Keyword.ArmorShield))
                     skillWeights[Skill.Block] += 1;
@@ -509,91 +531,105 @@ namespace TrueUnleveledSkyrim.Patch
                 else if (armorGetter.HasKeyword(Skyrim.Keyword.ArmorLight))
                     skillWeights[Skill.LightArmor] += 1;
             }
-            // Go through the leveled list tree.
-            else if (outfitTargetGetter is ILeveledItemGetter leveledItemGetter)
-            {
-                foreach (var itemEntry in leveledItemGetter.Entries.EmptyIfNull())
-                {
-                    if (itemEntry.Data is null || !itemEntry.Data.Reference.TryResolve(linkCache, out var entryGetter))
-                        continue;
-
-                    GetItemSkillWeights(entryGetter, ref skillWeights, linkCache);
-                }
-            }
         }
 
-        private static void GetSpellSkillWeights(ISpellRecordGetter spellRecordGetter, ref IDictionary<Skill, float> skillWeights, ILinkCache linkCache, float divisor = 1)
+        /// <summary>
+        /// Processes the leaves of the leveled spell lists and managed the skill weights dictionary.
+        /// </summary>
+        /// <param name="spellRecordGetter"></param>
+        /// <param name="skillWeights"></param>
+        /// <param name="linkCache"></param>
+        /// <param name="divisor"></param>
+        private static void GetSpellSkillWeights(ISpellRecordGetter spellRecordGetter, IDictionary<Skill, float> skillWeights, ILinkCache linkCache, float divisor = 1)
         {
-            if (spellRecordGetter is ISpellGetter finalSpell)
-            {
-                if (finalSpell.Type != SpellType.Spell)
-                    return;
-
-                // Get magic skill from magic effect.
-                foreach (var effectGetter in finalSpell.Effects)
-                {
-                    if(effectGetter.BaseEffect.IsNull || !effectGetter.BaseEffect.TryResolve(linkCache, out var mgefGetter))
-                        continue;
-
-                    // Return once incremented, don't need to go through all mgefs, just until we find one with one of the magic schools.
-                    switch (mgefGetter.MagicSkill)
-                    {
-                        case ActorValue.Destruction:
-                            skillWeights[Skill.Destruction] += 1 / divisor;
-                            return;
-                        case ActorValue.Alteration:
-                            skillWeights[Skill.Alteration] += 1 / divisor;
-                            return;
-                        case ActorValue.Conjuration:
-                            skillWeights[Skill.Conjuration] += 1 / divisor;
-                            return;
-                        case ActorValue.Illusion:
-                            skillWeights[Skill.Illusion] += 1 / divisor;
-                            return;
-                        case ActorValue.Restoration:
-                            skillWeights[Skill.Restoration] += 1 / divisor;
-                            return;
-                    }
-                }
-
+            if (spellRecordGetter is not ISpellGetter finalSpell)
                 return;
-            }
 
-            if (spellRecordGetter is ILeveledSpellGetter leveledSpellGetter)
+            if (finalSpell.Type != SpellType.Spell)
+                return;
+
+            // Get magic skill from magic effect.
+            foreach (var effectGetter in finalSpell.Effects)
             {
-                foreach (var spellEntry in leveledSpellGetter.Entries.EmptyIfNull())
-                {
-                    if (spellEntry.Data is null || !spellEntry.Data.Reference.TryResolve(linkCache, out var spellGetter))
-                        continue;
+                if(effectGetter.BaseEffect.IsNull || !effectGetter.BaseEffect.TryResolve(linkCache, out var mgefGetter))
+                    continue;
 
-                    GetSpellSkillWeights(spellGetter, ref skillWeights, linkCache, divisor);
+                // Return once incremented, don't need to go through all mgefs, just until we find one with one of the magic schools.
+                switch (mgefGetter.MagicSkill)
+                {
+                    case ActorValue.Destruction:
+                        skillWeights[Skill.Destruction] += 1 / divisor;
+                        return;
+                    case ActorValue.Alteration:
+                        skillWeights[Skill.Alteration] += 1 / divisor;
+                        return;
+                    case ActorValue.Conjuration:
+                        skillWeights[Skill.Conjuration] += 1 / divisor;
+                        return;
+                    case ActorValue.Illusion:
+                        skillWeights[Skill.Illusion] += 1 / divisor;
+                        return;
+                    case ActorValue.Restoration:
+                        skillWeights[Skill.Restoration] += 1 / divisor;
+                        return;
                 }
             }
         }
 
-        private static void PopulateByInventory(INpcSpawnGetter npcSpawn, ref IDictionary<Skill, float> skillWeights, ILinkCache linkCache, float divisor = 1)
+        /// <summary>
+        /// Traverses the leveled spell lists and calls the function managing the skill weights when a leaf is found.
+        /// </summary>
+        /// <param name="leveledSpellGetter"></param>
+        /// <param name="skillWeights"></param>
+        /// <param name="linkCache"></param>
+        /// <param name="divisor"></param>
+        private static void GetSpellSkillWeights(ILeveledSpellGetter leveledSpellGetter, IDictionary<Skill, float> skillWeights, ILinkCache linkCache, float divisor = 1)
         {
-            // Populate skill weights by inventory.
-            if (npcSpawn is INpcGetter npcFinal)
+            List<ILeveledSpellEntryGetter> nodes = leveledSpellGetter.Entries?.ToList() ?? new();
+            while (nodes.Any())
             {
-                if (!npcFinal.Configuration.TemplateFlags.HasFlag(NpcConfiguration.TemplateFlag.Inventory))
+                var node = nodes.Last();
+                nodes.RemoveAt(nodes.Count - 1);
+                if (node.Data is null || !node.Data.Reference.TryResolve(linkCache, out var entryGetter))
+                    continue;
+
+                if (entryGetter is ILeveledSpellGetter lvlSpellNode)
                 {
-                    foreach (var itemEntry in npcFinal.Items.EmptyIfNull())
+                    foreach (var child in lvlSpellNode.Entries.EmptyIfNull())
+                        nodes.Add(child);
+                }
+                else GetSpellSkillWeights(entryGetter, skillWeights, linkCache, divisor);
+            }
+        }
+
+        /// <summary>
+        /// Resolves npc templates and traverses leveled npc lists, then calls GetItemSkillWeights on the leaves.
+        /// </summary>
+        /// <param name="npcSpawn"></param>
+        /// <param name="skillWeights"></param>
+        /// <param name="linkCache"></param>
+        private static void PopulateByInventory(INpcSpawnGetter npcSpawn, IDictionary<Skill, float> skillWeights, ILinkCache linkCache)
+        {
+            List<ValueTuple<INpcSpawnGetter, int>> nodes = new();
+            if (npcSpawn is INpcGetter npcGetter)
+            {
+                if (npcGetter.Configuration.TemplateFlags.HasFlag(NpcConfiguration.TemplateFlag.Inventory) && npcGetter.Template.TryResolve(linkCache, out var newNpcSingleSpawn))
+                {
+                    nodes.Add(new(newNpcSingleSpawn, 1));
+                }
+                else // Populate skill weights by inventory.
+                {
+                    foreach (var itemEntry in npcGetter.Items.EmptyIfNull())
                     {
                         if (!itemEntry.Item.Item.TryResolve(linkCache, out var itemGetter))
                             continue;
 
-                        GetItemSkillWeights(itemGetter, ref skillWeights, linkCache, divisor);
+                        if (itemGetter is ILeveledItemGetter leveledItemGetter)
+                            GetItemSkillWeights(leveledItemGetter, skillWeights, linkCache);
+                        else
+                            GetItemSkillWeights(itemGetter, skillWeights);
                     }
-
-                    return;
                 }
-            }
-
-            // Go through the actor tree via npc or leveled list forms.
-            if (npcSpawn is INpcGetter npcGetter && npcGetter.Template.TryResolve(linkCache, out var newNpcSingleSpawn))
-            {
-                PopulateByInventory(newNpcSingleSpawn, ref skillWeights, linkCache, divisor);
             }
             else if (npcSpawn is ILeveledNpcGetter listGetter)
             {
@@ -602,34 +638,76 @@ namespace TrueUnleveledSkyrim.Patch
                     if (listEntry.Data is null || !listEntry.Data.Reference.TryResolve(linkCache, out var newNpcListSpawn))
                         continue;
 
-                    PopulateByInventory(newNpcListSpawn, ref skillWeights, linkCache, listGetter.Entries!.Count);
+                    nodes.Add(new(newNpcListSpawn, listGetter.Entries!.Count));
+                }
+            }
+
+            while (nodes.Any())
+            {
+                var node = nodes.Last();
+                nodes.RemoveAt(nodes.Count - 1);
+
+                if (node.Item1 is ILeveledNpcGetter listGetter)
+                {
+                    foreach (var child in listGetter.Entries.EmptyIfNull())
+                    {
+                        if (child.Data is null || !child.Data.Reference.TryResolve(linkCache, out var listSpawn))
+                            continue;
+
+                        nodes.Add(new(listSpawn, listGetter.Entries!.Count));
+                    }
+                }
+                else if (node.Item1 is INpcGetter singleGetter)
+                {
+                    if (singleGetter.Configuration.TemplateFlags.HasFlag(NpcConfiguration.TemplateFlag.Inventory) && singleGetter.Template.TryResolve(linkCache, out var singleSpawn))
+                    {
+                        nodes.Add(new(singleSpawn, 1));
+                    }
+                    else // Populate skill weights by inventory.
+                    {
+                        foreach (var itemEntry in singleGetter.Items.EmptyIfNull())
+                        {
+                            if (!itemEntry.Item.Item.TryResolve(linkCache, out var itemGetter))
+                                continue;
+
+                            if (itemGetter is ILeveledItemGetter leveledItemGetter)
+                                GetItemSkillWeights(leveledItemGetter, skillWeights, linkCache, node.Item2);
+                            else
+                                GetItemSkillWeights(itemGetter, skillWeights, node.Item2);
+                        }
+                    }
                 }
             }
         }
 
-        private static void PopulateBySpells(INpcSpawnGetter npcSpawn, ref IDictionary<Skill, float> skillWeights, ILinkCache linkCache, float divisor = 1)
+        /// <summary>
+        /// Resolves npc templates and traverses leveled npc lists, then calls GetSpellSkillWeights on the leaves.
+        /// </summary>
+        /// <param name="npcSpawn"></param>
+        /// <param name="skillWeights"></param>
+        /// <param name="linkCache"></param>
+        private static void PopulateBySpells(INpcSpawnGetter npcSpawn, IDictionary<Skill, float> skillWeights, ILinkCache linkCache)
         {
-            // Populate skill weights by spells.
-            if (npcSpawn is INpcGetter npcFinal)
+            List<ValueTuple<INpcSpawnGetter, int>> nodes = new();
+            if (npcSpawn is INpcGetter npcGetter)
             {
-                if (!npcFinal.Configuration.TemplateFlags.HasFlag(NpcConfiguration.TemplateFlag.SpellList))
+                if (npcGetter.Configuration.TemplateFlags.HasFlag(NpcConfiguration.TemplateFlag.Inventory) && npcGetter.Template.TryResolve(linkCache, out var newNpcSingleSpawn))
                 {
-                    foreach (var spellEntry in npcFinal.ActorEffect.EmptyIfNull())
+                    nodes.Add(new(newNpcSingleSpawn, 1));
+                }
+                else // Populate skill weights by inventory.
+                {
+                    foreach (var spellEntry in npcGetter.ActorEffect.EmptyIfNull())
                     {
                         if (!spellEntry.TryResolve(linkCache, out var spellRecordGetter))
                             continue;
 
-                        GetSpellSkillWeights(spellRecordGetter, ref skillWeights, linkCache, divisor);
+                        if (spellRecordGetter is ILeveledSpellGetter leveledSpellGetter)
+                            GetSpellSkillWeights(leveledSpellGetter, skillWeights, linkCache);
+                        else
+                            GetSpellSkillWeights(spellRecordGetter, skillWeights, linkCache);
                     }
-
-                    return;
                 }
-            }
-
-            // Go through the actor tree via npc or leveled list forms.
-            if (npcSpawn is INpcGetter npcGetter && npcGetter.Template.TryResolve(linkCache, out var newNpcSingleSpawn))
-            {
-                PopulateBySpells(newNpcSingleSpawn, ref skillWeights, linkCache, divisor);
             }
             else if (npcSpawn is ILeveledNpcGetter listGetter)
             {
@@ -638,12 +716,49 @@ namespace TrueUnleveledSkyrim.Patch
                     if (listEntry.Data is null || !listEntry.Data.Reference.TryResolve(linkCache, out var newNpcListSpawn))
                         continue;
 
-                    PopulateBySpells(newNpcListSpawn, ref skillWeights, linkCache, listGetter.Entries!.Count);
+                    nodes.Add(new(newNpcListSpawn, listGetter.Entries!.Count));
+                }
+            }
+
+            while (nodes.Any())
+            {
+                var node = nodes.Last();
+                nodes.RemoveAt(nodes.Count - 1);
+
+                if (node.Item1 is ILeveledNpcGetter listGetter)
+                {
+                    foreach (var child in listGetter.Entries.EmptyIfNull())
+                    {
+                        if (child.Data is null || !child.Data.Reference.TryResolve(linkCache, out var listSpawn))
+                            continue;
+
+                        nodes.Add(new(listSpawn, listGetter.Entries!.Count));
+                    }
+                }
+                else if (node.Item1 is INpcGetter singleGetter)
+                {
+                    if (singleGetter.Configuration.TemplateFlags.HasFlag(NpcConfiguration.TemplateFlag.Inventory) && singleGetter.Template.TryResolve(linkCache, out var singleSpawn))
+                    {
+                        nodes.Add(new(singleSpawn, 1));
+                    }
+                    else // Populate skill weights by inventory.
+                    {
+                        foreach (var spellEntry in singleGetter.ActorEffect.EmptyIfNull())
+                        {
+                            if (!spellEntry.TryResolve(linkCache, out var spellRecordGetter))
+                                continue;
+
+                            if (spellRecordGetter is ILeveledSpellGetter leveledSpellGetter)
+                                GetSpellSkillWeights(leveledSpellGetter, skillWeights, linkCache, node.Item2);
+                            else
+                                GetSpellSkillWeights(spellRecordGetter, skillWeights, linkCache, node.Item2);
+                        }
+                    }
                 }
             }
         }
 
-        private static void PopulateByOutfit(Npc npc, ref IDictionary<Skill, float> skillWeights, ILinkCache linkCache)
+        private static void PopulateByOutfit(Npc npc, IDictionary<Skill, float> skillWeights, ILinkCache linkCache)
         {
             if (npc.DefaultOutfit.IsNull || !npc.DefaultOutfit.TryResolve(linkCache, out var outfitGetter))
                 return;
@@ -653,16 +768,16 @@ namespace TrueUnleveledSkyrim.Patch
                 if (!outfitEntry.TryResolve(linkCache, out var entryGetter))
                     continue;
 
-                GetItemSkillWeights(entryGetter, ref skillWeights, linkCache);
+                GetItemSkillWeights(entryGetter, skillWeights, linkCache);
             }
         }
 
         private static void PopulateSkillWeights(Npc npc, IDictionary<Skill, float> skillWeights, ILinkCache linkCache)
         {
             // Populate weights.
-            PopulateByInventory(npc, ref skillWeights, linkCache);
-            PopulateBySpells(npc, ref skillWeights, linkCache);
-            PopulateByOutfit(npc, ref skillWeights, linkCache);
+            PopulateByInventory(npc, skillWeights, linkCache);
+            PopulateBySpells(npc, skillWeights, linkCache);
+            PopulateByOutfit(npc, skillWeights, linkCache);
 
             // Ceil them all to the nearest whole value.
             skillWeights.ForEach(x => skillWeights[x.Key] = (float)Math.Ceiling(x.Value));
@@ -802,7 +917,7 @@ namespace TrueUnleveledSkyrim.Patch
                 wasChanged |= SetStaticLevel(npcCopy, Patcher.LinkCache);
                 wasChanged |= RebalanceClassValues(npcCopy, state, Patcher.LinkCache); // since it uses a static link cache it has to go before equipment changes, otherwise it will try to use missing data
                 wasChanged |= ChangeEquipment(npcCopy, state, Patcher.LinkCache);
-                wasChanged |= RelevelNPCSkills(npcCopy, state.LinkCache); // dynamic link cache to account for class changes
+                wasChanged |= RelevelNPCSkills(npcCopy, state.LinkCache); // dynamic link cache to account for local class changes
                 wasChanged |= DistributeNPCPerks(npcCopy, state.LinkCache, vanillaCache);
                 wasChanged |= SetFollowerScaling(npcCopy);
 

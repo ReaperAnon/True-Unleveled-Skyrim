@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 using Mutagen.Bethesda.FormKeys.SkyrimSE;

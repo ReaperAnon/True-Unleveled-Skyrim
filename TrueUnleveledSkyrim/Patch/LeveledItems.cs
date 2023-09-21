@@ -1,6 +1,3 @@
-using System;
-using System.Linq;
-
 using Noggog;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Synthesis;
