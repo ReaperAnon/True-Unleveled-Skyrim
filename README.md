@@ -2,6 +2,8 @@
 ### [Synthesis Install](https://github.com/Mutagen-Modding/Synthesis/wiki/Installation)
 ### [How to Use](https://github.com/Mutagen-Modding/Synthesis/wiki/Typical-Usage#adding-patchers)
 
+### [Support Discord](https://discord.gg/u4zNjc2a)
+
 The mod can be found either by searching for True Unleveled Skyrim on the patcher list or added via the .synth file found [here](https://github.com/ReaperAnon/True-Unleveled-Skyrim/releases/tag/meta).
 
 ### Consider donating if you enjoy my work:
