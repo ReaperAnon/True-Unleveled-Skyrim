@@ -5,6 +5,7 @@ using Mutagen.Bethesda.Synthesis;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Order;
+using Mutagen.Bethesda.Plugins.Exceptions;
 
 namespace TrueUnleveledSkyrim.Patch
 {
@@ -722,19 +723,27 @@ namespace TrueUnleveledSkyrim.Patch
             ReadArmorValues();
 
             uint processedRecords = 0;
-            foreach(IArmorGetter? armorGetter in state.LoadOrder.PriorityOrder.Armor().WinningOverrides())
+            foreach (IArmorGetter? armorGetter in state.LoadOrder.PriorityOrder.Armor().WinningOverrides())
             {
-                bool wasChanged = false;
-                Armor armorCopy = armorGetter.DeepCopy();
+                try
+                {
+                    bool wasChanged = false;
+                    Armor armorCopy = armorGetter.DeepCopy();
 
-                wasChanged |= PatchArmorValues(armorCopy);
+                    wasChanged |= PatchArmorValues(armorCopy);
 
-                ++processedRecords;
-                if (processedRecords % 100 == 0)
-                    Console.WriteLine("Processed " + processedRecords + " armors.");
+                    ++processedRecords;
+                    if (processedRecords % 100 == 0)
+                        Console.WriteLine("Processed " + processedRecords + " armors.");
 
-                if(wasChanged)
-                    state.PatchMod.Armors.Set(armorCopy);
+                    if (wasChanged)
+                        state.PatchMod.Armors.Set(armorCopy);
+
+                }
+                catch (Exception ex)
+                {
+                    throw RecordException.Enrich(ex, armorGetter);
+                }
             }
 
             Console.WriteLine("Processed " + processedRecords + " armors in total.\n");
@@ -742,20 +751,27 @@ namespace TrueUnleveledSkyrim.Patch
 
             foreach (IWeaponGetter? weaponGetter in state.LoadOrder.PriorityOrder.Weapon().WinningOverrides())
             {
-                bool wasChanged = false;
-                Weapon weaponCopy = weaponGetter.DeepCopy();
+                try
+                {
+                    bool wasChanged = false;
+                    Weapon weaponCopy = weaponGetter.DeepCopy();
 
-                wasChanged |= PatchWeaponValues(weaponCopy);
+                    wasChanged |= PatchWeaponValues(weaponCopy);
 
-                ++processedRecords;
-                if (processedRecords % 100 == 0)
-                    Console.WriteLine("Processed " + processedRecords + " weapons.");
+                    ++processedRecords;
+                    if (processedRecords % 100 == 0)
+                        Console.WriteLine("Processed " + processedRecords + " weapons.");
 
-                if (wasChanged)
-                    state.PatchMod.Weapons.Set(weaponCopy);
+                    if (wasChanged)
+                        state.PatchMod.Weapons.Set(weaponCopy);
+                }
+                catch (Exception ex)
+                {
+                    throw RecordException.Enrich(ex, weaponGetter);
+                }
             }
 
-            if(Patcher.ModSettings.Value.Rebalance.TemperingDebuff)
+            if (Patcher.ModSettings.Value.Rebalance.TemperingDebuff)
             {
                 var armorGMST = state.PatchMod.GameSettings.AddNewFloat();
                 var weaponGMST = state.PatchMod.GameSettings.AddNewFloat();
