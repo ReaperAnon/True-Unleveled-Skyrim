@@ -270,7 +270,7 @@ namespace TrueUnleveledSkyrim.Patch
                     continue;
 
                 // Remove if present in the vanilla cache.
-                if (vanillaCache.TryResolve(npc.Perks[i].Perk, out _))
+                if (vanillaCache.TryResolve(npc.Perks[i].Perk, out var perk))
                     npc.Perks.RemoveAt(i);
             }
         }

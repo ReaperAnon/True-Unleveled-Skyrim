@@ -24,20 +24,20 @@ namespace TrueUnleveledSkyrim.Patch
 
             if (Patcher.ModSettings.Value.Zones.StaticZoneLevels)
             {
-                encZone.MinLevel = (sbyte)Patcher.Randomizer.Next(zoneDefinition.MinLevel, zoneDefinition.MaxLevel);
+                encZone.MinLevel = (byte)Patcher.Randomizer.Next(zoneDefinition.MinLevel, zoneDefinition.MaxLevel);
                 encZone.MaxLevel = encZone.MinLevel;
             }
             else
             {
                 if (zoneDefinition.MaxLevel == 0)
                 {
-                    encZone.MinLevel = (sbyte)Patcher.Randomizer.Next(zoneDefinition.MinLevel, zoneDefinition.MinLevel + zoneDefinition.Range);
+                    encZone.MinLevel = (byte)Patcher.Randomizer.Next(zoneDefinition.MinLevel, zoneDefinition.MinLevel + zoneDefinition.Range);
                     encZone.MaxLevel = 0;
                 }
                 else
                 {
-                    encZone.MinLevel = (sbyte)Patcher.Randomizer.Next(zoneDefinition.MinLevel, zoneDefinition.MaxLevel - zoneDefinition.Range + 1);
-                    encZone.MaxLevel = (sbyte)(encZone.MinLevel + zoneDefinition.Range);
+                    encZone.MinLevel = (byte)Patcher.Randomizer.Next(zoneDefinition.MinLevel, zoneDefinition.MaxLevel - zoneDefinition.Range + 1);
+                    encZone.MaxLevel = (byte)(encZone.MinLevel + zoneDefinition.Range);
                 }
             }
         }
@@ -103,7 +103,7 @@ namespace TrueUnleveledSkyrim.Patch
             foreach (var zoneGetter in state.LoadOrder.PriorityOrder.EncounterZone().WinningOverrides())
             {
                 // Skip encounter zones that can be found in the cache defined by the plugin filter list.
-                if (forbiddenCache.TryResolve(zoneGetter.ToLink(), out _))
+                if (forbiddenCache.TryResolve(zoneGetter.ToLink(), out var perk))
                     continue;
 
                 bool wasChanged = false;
